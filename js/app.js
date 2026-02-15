@@ -330,7 +330,7 @@ function renderSidebar(chapters) {
     list.innerHTML = '';
 
     if (chapters.length === 0) {
-        list.innerHTML = '<li class="chapter-empty">Ø³ØªØªÙ… Ø¥Ø¶Ø§ÙØ© Ø§Ù„ÙØµÙˆÙ„ Ù„Ø§Ø­Ù‚Ù‹Ø§.</li>';
+        list.innerHTML = '<li class="chapter-empty">\u0633\u062a\u062a\u0645 \u0625\u0636\u0627\u0641\u0629 \u0627\u0644\u0641\u0635\u0648\u0644 \u0644\u0627\u062d\u0642\u064b\u0627.</li>';
         currentChapters = [];
         return;
     }
