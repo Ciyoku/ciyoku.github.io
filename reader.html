@@ -5,9 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>القارئ | Reader</title>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/reader.css">
 </head>
 
 <body>
@@ -15,7 +14,10 @@
     <header>
         <div class="logo">
             <a href="index.html" class="back-link">
-                <i class="fas fa-arrow-right"></i>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M10 5l7 7-7 7"></path>
+                    <path d="M4 12h13"></path>
+                </svg>
                 <span>العودة للمكتبة</span>
             </a>
         </div>
@@ -26,9 +28,27 @@
                     <path d="M12 2.25l2.86 5.79 6.39.93-4.62 4.5 1.09 6.37L12 16.84l-5.72 3 1.09-6.37-4.62-4.5 6.39-.93L12 2.25z"></path>
                 </svg>
             </a>
-            <div class="icon" id="searchBtn" title="بحث في الكتاب"><i class="fas fa-search"></i></div>
-            <div class="icon" id="favBtn" title="إضافة للمفضلة"><i class="far fa-bookmark"></i></div>
-            <div class="icon" id="sidebarToggle" title="قائمة الفصول"><i class="fas fa-list"></i></div>
+            <button type="button" class="icon" id="searchBtn" title="بحث في الكتاب">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <path d="M20 20l-3.5-3.5"></path>
+                </svg>
+            </button>
+            <button type="button" class="icon" id="favBtn" title="إضافة للمفضلة">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"></path>
+                </svg>
+            </button>
+            <button type="button" class="icon" id="sidebarToggle" title="قائمة الفصول">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M9 6h11"></path>
+                    <path d="M9 12h11"></path>
+                    <path d="M9 18h11"></path>
+                    <circle cx="4.5" cy="6" r="1"></circle>
+                    <circle cx="4.5" cy="12" r="1"></circle>
+                    <circle cx="4.5" cy="18" r="1"></circle>
+                </svg>
+            </button>
         </div>
     </header>
 
@@ -36,7 +56,10 @@
         <!-- Content Area -->
         <div class="reader-content full-width" id="readerContent">
             <div class="loading">
-                <i class="fas fa-circle-notch fa-spin"></i>
+                <svg class="loading-spinner" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <path d="M21 12a9 9 0 0 0-9-9"></path>
+                </svg>
                 <p>جاري تحميل الكتاب...</p>
             </div>
         </div>
@@ -44,7 +67,15 @@
         <!-- Right Sidebar (Chapters) -->
         <aside class="sidebar hidden" id="sidebar">
             <div class="sidebar-title">
-                <i class="fas fa-list-ul"></i> الفهرس
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M9 6h11"></path>
+                    <path d="M9 12h11"></path>
+                    <path d="M9 18h11"></path>
+                    <circle cx="4.5" cy="6" r="1"></circle>
+                    <circle cx="4.5" cy="12" r="1"></circle>
+                    <circle cx="4.5" cy="18" r="1"></circle>
+                </svg>
+                الفهرس
             </div>
             <ul class="chapter-list" id="chapterList">
                 <!-- Chapters injected here -->
@@ -55,7 +86,12 @@
         <div class="search-overlay" id="searchOverlay">
             <div class="search-overlay-header">
                 <h3>بحث</h3>
-                <i class="fas fa-times icon" id="closeSearch"></i>
+                <button type="button" class="icon" id="closeSearch" aria-label="إغلاق البحث">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M6 6l12 12"></path>
+                        <path d="M18 6L6 18"></path>
+                    </svg>
+                </button>
             </div>
             <input type="text" id="searchInput" class="search-input" placeholder="ابحث في هذا الكتاب...">
             <div class="search-results" id="searchResults">
@@ -66,10 +102,31 @@
 
     <!-- Floating Controls -->
     <div class="reader-controls">
-        <div class="icon" onclick="changeFontSize(1)" title="تكبير الخط"><i class="fas fa-plus"></i></div>
-        <div class="icon" onclick="changeFontSize(-1)" title="تصغير الخط"><i class="fas fa-minus"></i></div>
-        <div class="icon" onclick="toggleFullscreen()" title="ملء الشاشة"><i class="fas fa-expand"></i></div>
-        <div class="icon" onclick="scrollToTop()" title="للأعلى"><i class="fas fa-arrow-up"></i></div>
+        <button type="button" class="icon" data-control="font-up" title="تكبير الخط">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M12 5v14"></path>
+                <path d="M5 12h14"></path>
+            </svg>
+        </button>
+        <button type="button" class="icon" data-control="font-down" title="تصغير الخط">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M5 12h14"></path>
+            </svg>
+        </button>
+        <button type="button" class="icon" data-control="fullscreen" title="ملء الشاشة">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M9 3H3v6"></path>
+                <path d="M15 3h6v6"></path>
+                <path d="M21 15v6h-6"></path>
+                <path d="M3 15v6h6"></path>
+            </svg>
+        </button>
+        <button type="button" class="icon" data-control="top" title="للأعلى">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M12 19V6"></path>
+                <path d="M6 12l6-6 6 6"></path>
+            </svg>
+        </button>
     </div>
 
     <footer class="site-footer">
@@ -81,9 +138,7 @@
         <p class="footer-hint">تلميح: يمكنك حفظ الكتاب الحالي من زر الحفظ في الأعلى.</p>
     </footer>
 
-    <script src="js/favorites-store.js"></script>
-    <script src="js/books-meta.js"></script>
-    <script src="js/app.js"></script>
+    <script type="module" src="js/app.js"></script>
 </body>
 
 </html>

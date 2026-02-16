@@ -1,81 +1,69 @@
-document.addEventListener('DOMContentLoaded', () => {
-    loadFavorites();
-});
+import { fetchBooksList } from './books-repo.js';
+import { buildReaderUrl, getBookId, getBookTitle } from './books-meta.js';
+import { getFavorites, setFavorite } from './favorites-store.js';
+import { onDomReady } from './shared/bootstrap.js';
+import {
+    createBookListItem,
+    createFavoriteToggleButton,
+    renderListMessage
+} from './book-list-ui.js';
+
+const EMPTY_FAVORITES_MESSAGE = 'لا توجد كتب مفضلة حتى الآن.';
+
+onDomReady(loadFavorites);
 
 async function loadFavorites() {
     const container = document.getElementById('favoritesList');
-    const favoriteIds = new Set(window.favoritesStore?.getFavorites() || []);
+    const favoriteIds = new Set(getFavorites());
 
     if (!favoriteIds.size) {
-        container.innerHTML = '<li class="book-list-error">لا توجد كتب مفضلة حتى الآن.</li>';
+        renderListMessage(container, EMPTY_FAVORITES_MESSAGE);
         return;
     }
 
     try {
-        const response = await fetch('books/list.json');
-        if (!response.ok) {
-            throw new Error('تعذر تحميل قائمة الكتب');
-        }
-
-        const books = await response.json();
-        if (!Array.isArray(books)) {
-            throw new Error('صيغة قائمة الكتب غير صحيحة');
-        }
-
-        const favoriteBooks = books.filter((book) => favoriteIds.has(String(book?.id ?? '')));
+        const books = await fetchBooksList();
+        const favoriteBooks = books.filter((book) => favoriteIds.has(getBookId(book)));
         container.innerHTML = '';
 
         favoriteBooks.forEach((book, index) => {
-            const id = window.booksMeta?.getBookId(book) || String(book?.id ?? '').trim();
-            const title = window.booksMeta?.getBookTitle(book, index) || `كتاب ${index + 1}`;
+            const id = getBookId(book);
+            const title = getBookTitle(book, index);
             if (!id) return;
 
-            const item = document.createElement('li');
-            item.className = 'book-list-item fade-in';
-            item.dataset.bookId = id;
+            const item = createBookListItem({
+                bookId: id,
+                title,
+                href: buildReaderUrl(book, 0),
+                favoriteButton: createRemoveButton(id, container)
+            });
 
-            const link = document.createElement('a');
-            link.href = window.booksMeta
-                ? window.booksMeta.buildReaderUrl(book, 0)
-                : `reader.html?book=${encodeURIComponent(id)}`;
-            link.className = 'book-link';
-            link.textContent = title;
-
-            const button = createRemoveButton(id, item, container);
-
-            item.appendChild(link);
-            item.appendChild(button);
             container.appendChild(item);
         });
 
         if (!container.children.length) {
-            container.innerHTML = '<li class="book-list-error">لا توجد كتب مفضلة حتى الآن.</li>';
+            renderListMessage(container, EMPTY_FAVORITES_MESSAGE);
         }
     } catch (error) {
-        container.innerHTML = `<li class="book-list-error">خطأ في تحميل المفضلة: ${error.message}</li>`;
+        renderListMessage(container, `خطأ في تحميل المفضلة: ${error.message}`);
     }
 }
 
-function createRemoveButton(bookId, row, container) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'favorite-toggle is-active';
-    button.title = 'إزالة من المفضلة';
-    button.setAttribute('aria-label', 'إزالة من المفضلة');
-    button.setAttribute('aria-pressed', 'true');
-    button.innerHTML = `
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="M12 2.25l2.86 5.79 6.39.93-4.62 4.5 1.09 6.37L12 16.84l-5.72 3 1.09-6.37-4.62-4.5 6.39-.93L12 2.25z"></path>
-        </svg>
-    `;
+function createRemoveButton(bookId, container) {
+    const button = createFavoriteToggleButton({
+        active: true,
+        title: 'إزالة من المفضلة',
+        ariaLabel: 'إزالة من المفضلة'
+    });
 
     button.addEventListener('click', (event) => {
         event.preventDefault();
-        if (!window.favoritesStore) return;
-        window.favoritesStore.setFavorite(bookId, false);
-        row.remove();
+        setFavorite(bookId, false);
+        const row = button.closest('.book-list-item');
+        if (row) row.remove();
+
         if (!container.children.length) {
-            container.innerHTML = '<li class="book-list-error">لا توجد كتب مفضلة حتى الآن.</li>';
+            renderListMessage(container, EMPTY_FAVORITES_MESSAGE);
         }
     });
 
