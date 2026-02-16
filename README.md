@@ -43,30 +43,6 @@ http://localhost:8000
 ```
 
 ---
-
-## بنية الملفات المهمة
-
-```text
-.
-├─ index.html                 # صفحة قائمة الكتب
-├─ reader.html                # صفحة القارئ
-├─ favorites.html             # صفحة المفضلة
-├─ books/
-│  ├─ list.json               # بيانات الكتب (id, title, parts)
-│  └─ <book-id>/
-│     ├─ book.txt             # الجزء الأول
-│     ├─ book2.txt            # الجزء الثاني (إن وجد)
-│     └─ ...
-├─ js/
-│  ├─ index.js                # منطق صفحة الفهرس
-│  ├─ favorites-page.js       # منطق صفحة المفضلة
-│  └─ reader/                 # منطق القارئ (تنقل، بحث، فهرس)
-└─ css/
-   ├─ base.css
-   ├─ catalog.css
-   └─ reader.css
-```
----
 ## صيغة بيانات الكتب
 
 ملف `books/list.json` يحتوي على مصفوفة عناصر، كل عنصر بصيغة:
