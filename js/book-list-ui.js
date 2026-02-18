@@ -1,8 +1,4 @@
-const STAR_ICON = `
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d="M12 2.25l2.86 5.79 6.39.93-4.62 4.5 1.09 6.37L12 16.84l-5.72 3 1.09-6.37-4.62-4.5 6.39-.93L12 2.25z"></path>
-    </svg>
-`;
+import { renderLucideIcons } from './shared/lucide.js';
 
 export function createFavoriteToggleButton({ active = false, title, ariaLabel }) {
     const button = document.createElement('button');
@@ -10,34 +6,60 @@ export function createFavoriteToggleButton({ active = false, title, ariaLabel })
     button.className = 'favorite-toggle';
     button.title = title;
     button.setAttribute('aria-label', ariaLabel);
-    button.innerHTML = STAR_ICON;
     setFavoriteToggleState(button, active);
     return button;
 }
 
 export function setFavoriteToggleState(button, isActive) {
+    button.replaceChildren();
+    const iconPlaceholder = document.createElement('i');
+    iconPlaceholder.setAttribute('data-lucide', isActive ? 'heart-minus' : 'heart-plus');
+    iconPlaceholder.setAttribute('aria-hidden', 'true');
+    button.appendChild(iconPlaceholder);
+    renderLucideIcons(button);
     button.classList.toggle('is-active', isActive);
     button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
 }
 
-export function createBookListItem({ bookId, title, href, favoriteButton }) {
+export function createBookListItem({
+    bookId,
+    title,
+    readHref,
+    favoriteButton
+}) {
     const item = document.createElement('li');
     item.className = 'book-list-item fade-in';
     if (bookId) {
         item.dataset.bookId = String(bookId);
     }
 
+    const card = document.createElement('article');
+    card.className = 'book-card';
+
     const link = document.createElement('a');
-    link.href = href;
+    link.href = readHref;
     link.className = 'book-link';
     link.textContent = title;
 
-    item.appendChild(link);
-    item.appendChild(favoriteButton);
+    card.appendChild(link);
+
+    item.appendChild(card);
+    if (favoriteButton instanceof Element) {
+        item.appendChild(favoriteButton);
+    }
     return item;
 }
 
 export function renderListMessage(container, message, tone = 'error') {
-    const cssClass = tone === 'loading' ? 'book-list-loading' : 'book-list-error';
-    container.innerHTML = `<li class="${cssClass}">${message}</li>`;
+    const cssClass = tone === 'loading'
+        ? 'book-list-loading'
+        : tone === 'empty'
+            ? 'book-list-empty'
+            : 'book-list-error';
+
+    container.replaceChildren();
+    const item = document.createElement('li');
+    item.className = cssClass;
+    item.textContent = message;
+    container.appendChild(item);
 }

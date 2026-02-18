@@ -1,49 +1,60 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>المفضلة | المكتبة الأخبارية</title>
+    <meta name="description" content="صفحة المفضلة الشخصية في المكتبة الأخبارية لعرض الكتب المحفوظة محليًا.">
+    <meta name="robots" content="noindex,nofollow,noarchive">
+    <link rel="canonical" href="https://ciyoku.github.io/favorites.html">
+    <meta property="og:locale" content="ar_AR">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="المفضلة | المكتبة الأخبارية">
+    <meta property="og:description" content="عرض الكتب المحفوظة في المفضلة على جهازك.">
+    <meta property="og:url" content="https://ciyoku.github.io/favorites.html">
+    <meta property="og:site_name" content="المكتبة الأخبارية">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="المفضلة | المكتبة الأخبارية">
+    <meta name="twitter:description" content="عرض الكتب المحفوظة في المفضلة على جهازك.">
+    <meta name="theme-color" content="#08090b">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; upgrade-insecure-requests">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/catalog.css">
 </head>
 
-<body>
-    <header>
-        <div class="logo">
-            <a href="index.html" class="back-link">العودة للمكتبة</a>
-        </div>
-        <div class="header-actions">
-            <a href="favorites.html" class="header-star-link is-active" title="المفضلة" aria-label="المفضلة">
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path d="M12 2.25l2.86 5.79 6.39.93-4.62 4.5 1.09 6.37L12 16.84l-5.72 3 1.09-6.37-4.62-4.5 6.39-.93L12 2.25z"></path>
-                </svg>
-            </a>
-        </div>
+<body class="books-page">
+    <a class="skip-link" href="#mainContent">تجاوز إلى المحتوى</a>
+
+    <header class="site-header site-header-nav">
+        <div class="logo"><a href="index.html" class="site-logo"><span>المكتبة</span><span>الأخبارية</span></a></div>
+
+                
     </header>
 
-    <main class="container">
+    <main class="container" id="mainContent">
         <section class="catalog-intro">
-            <h1>الكتب المفضلة</h1>
-            <p>العناوين التي قمت بحفظها.</p>
+            <p>هذه القائمة شخصية وتُحفَظ محليًا في المتصفح.</p>
+        </section>
+
+        <section class="catalog-tools" aria-label="أدوات المفضلة">
+            <div class="tool-group">
+                <label for="favoritesSearchInput">بحث داخل المفضلة</label>
+                <input id="favoritesSearchInput" class="catalog-search-input" type="search" placeholder="اكتب اسم الكتاب..." autocomplete="off">
+            </div>
         </section>
 
         <ul class="book-list" id="favoritesList">
             <li class="book-list-loading">جاري تحميل المفضلة...</li>
         </ul>
     </main>
-
-    <footer class="site-footer">
-        <div class="footer-copy">© 2026 المكتبة الأخبارية.</div>
-        <nav class="footer-nav" aria-label="تنقل التذييل">
-            <a href="index.html">الرئيسية</a>
-            <a href="favorites.html">المفضلات</a>
-        </nav>
-        <p class="footer-hint">تلميح: صفحة المفضلة تعرض فقط الكتب التي تم تمييزها بالنجمة.</p>
-    </footer>
-
-    <script type="module" src="js/favorites-page.js"></script>
+<script type="module" src="js/favorites-page.js"></script>
+    <script type="module" src="js/shared/site-shell.js"></script>
 </body>
 
 </html>
+
+

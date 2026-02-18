@@ -2,23 +2,28 @@ export function renderSearchResults({
     query,
     resultsContainer,
     closeSearchOverlay,
-    searchIndex,
+    searchEngine,
     searchInBookIndex,
-    highlightTextIgnoringDiacritics,
+    createHighlightedTextFragment,
     onOpenPage,
     onOpenChapter
 }) {
-    const { normalizedQuery, matches } = searchInBookIndex(searchIndex, query, 50);
+    const { normalizedQuery, matches } = searchInBookIndex(searchEngine, query, 50);
     if (!normalizedQuery) return;
 
     if (!matches.length) {
-        resultsContainer.innerHTML = '<div class="search-result-empty">لا توجد نتائج</div>';
+        const empty = document.createElement('div');
+        empty.className = 'search-result-empty';
+        empty.textContent = 'لا توجد نتائج';
+        resultsContainer.appendChild(empty);
         return;
     }
 
     matches.forEach((match) => {
-        const resultItem = document.createElement('div');
+        const resultItem = document.createElement('button');
+        resultItem.type = 'button';
         resultItem.className = 'search-result-item';
+        resultItem.setAttribute('role', 'option');
 
         const chapterElement = document.createElement('div');
         chapterElement.className = 'search-result-chapter';
@@ -26,7 +31,7 @@ export function renderSearchResults({
 
         const lineElement = document.createElement('div');
         lineElement.className = 'search-result-line';
-        lineElement.innerHTML = highlightTextIgnoringDiacritics(match.line, normalizedQuery);
+        lineElement.appendChild(createHighlightedTextFragment(match.line, normalizedQuery));
 
         resultItem.appendChild(chapterElement);
         resultItem.appendChild(lineElement);

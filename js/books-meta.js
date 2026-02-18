@@ -18,6 +18,30 @@ function getBookPartCount(book) {
     return 1;
 }
 
+function collectCategories(value, output) {
+    if (Array.isArray(value)) {
+        value.forEach((item) => collectCategories(item, output));
+        return;
+    }
+
+    if (value === null || value === undefined) return;
+    if (typeof value !== 'string' && typeof value !== 'number') return;
+
+    const normalized = String(value).trim();
+    if (normalized) {
+        output.push(normalized);
+    }
+}
+
+function getBookCategories(book) {
+    const categories = [];
+    collectCategories(book?.categories, categories);
+    collectCategories(book?.category, categories);
+    collectCategories(book?.['التصنيفات'], categories);
+    collectCategories(book?.['التصنيف'], categories);
+    return [...new Set(categories)];
+}
+
 function hasMultipleParts(book) {
     return getBookPartCount(book) > 1;
 }
@@ -57,25 +81,54 @@ function parsePartParam(partValue) {
 }
 
 function buildReaderUrl(book, partIndex = 0) {
-    const id = getBookId(book);
+    return buildReaderUrlWithState(book, { partIndex });
+}
+
+function buildReaderUrlWithState(book, state = {}) {
+    const id = getBookId(book) || normalizeId(state.bookId);
     if (!id) return 'reader.html';
 
     const params = new URLSearchParams();
     params.set('book', id);
 
-    const safePartIndex = normalizePartIndex(partIndex);
+    const safePartIndex = normalizePartIndex(state.partIndex);
     if (shouldIncludePartInUrl(book, safePartIndex)) {
         params.set('part', toPartParam(safePartIndex));
+    }
+
+    const pageIndex = Number.isInteger(state.pageIndex) && state.pageIndex >= 0
+        ? state.pageIndex
+        : null;
+    if (pageIndex !== null && pageIndex > 0) {
+        params.set('page', String(pageIndex + 1));
+    }
+
+    const chapterId = String(state.chapterId ?? '').trim();
+    if (chapterId) {
+        params.set('chapter', chapterId);
     }
 
     return `reader.html?${params.toString()}`;
 }
 
+function buildBookDetailsUrl(book) {
+    const id = getBookId(book);
+    if (!id) return 'book-details.html';
+
+    const params = new URLSearchParams();
+    params.set('book', id);
+    return `book-details.html?${params.toString()}`;
+}
+
 export {
     getBookId,
     getBookPartCount,
+    getBookCategories,
     getBookTitle,
     parsePartParam,
     toPartParam,
-    buildReaderUrl
+    normalizePartIndex,
+    buildReaderUrl,
+    buildReaderUrlWithState,
+    buildBookDetailsUrl
 };

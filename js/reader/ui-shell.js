@@ -1,3 +1,8 @@
+import { hasMinimumQueryWords } from '../shared/query-words.js';
+
+const MIN_READER_SEARCH_WORDS = 2;
+const READER_MIN_SEARCH_WORDS_MESSAGE = 'اكتب كلمتين أو أكثر لبدء البحث.';
+
 function getReaderShellElements() {
     return {
         toggle: document.getElementById('sidebarToggle'),
@@ -7,7 +12,10 @@ function getReaderShellElements() {
         searchBtn: document.getElementById('searchBtn'),
         closeSearch: document.getElementById('closeSearch'),
         searchInput: document.getElementById('searchInput'),
-        controls: document.querySelector('.reader-controls')
+        searchHint: document.getElementById('searchHint'),
+        searchResults: document.getElementById('searchResults'),
+        controls: document.querySelector('.reader-controls'),
+        favBtn: document.getElementById('favBtn')
     };
 }
 
@@ -17,8 +25,14 @@ export function isCompactViewport() {
 
 export function closeSidebarOnCompactView() {
     if (!isCompactViewport()) return;
-    document.getElementById('sidebar').classList.add('hidden');
-    document.getElementById('readerContent').classList.add('full-width');
+    const sidebar = document.getElementById('sidebar');
+    const content = document.getElementById('readerContent');
+    const toggle = document.getElementById('sidebarToggle');
+
+    sidebar.classList.add('hidden');
+    sidebar.setAttribute('aria-hidden', 'true');
+    content.classList.add('full-width');
+    toggle.setAttribute('aria-expanded', 'false');
 }
 
 export function setupReaderUi({
@@ -26,7 +40,7 @@ export function setupReaderUi({
     onSearchQuery,
     isFavoriteBook,
     onToggleFavorite,
-    bookmarkIcons
+    applyFavoriteIcon
 }) {
     const {
         toggle,
@@ -36,12 +50,29 @@ export function setupReaderUi({
         searchBtn,
         closeSearch,
         searchInput,
-        controls
+        searchHint,
+        searchResults,
+        controls,
+        favBtn
     } = getReaderShellElements();
 
     let compactMode = isCompactViewport();
     let resizeTimer = null;
+    let searchDebounceTimer = null;
     let sidebarHiddenBeforeSearch = false;
+
+    const setSidebarVisibility = (hidden) => {
+        sidebar.classList.toggle('hidden', hidden);
+        sidebar.setAttribute('aria-hidden', hidden ? 'true' : 'false');
+        content.classList.toggle('full-width', hidden);
+        toggle.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+    };
+
+    const setSearchVisibility = (open) => {
+        searchOverlay.classList.toggle('active', open);
+        searchOverlay.setAttribute('aria-hidden', open ? 'false' : 'true');
+        searchBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    };
 
     const applyViewportLayout = (force = false) => {
         const nextCompactMode = isCompactViewport();
@@ -49,17 +80,25 @@ export function setupReaderUi({
         compactMode = nextCompactMode;
 
         if (compactMode) {
-            sidebar.classList.add('hidden');
-            content.classList.add('full-width');
+            setSidebarVisibility(true);
         }
     };
 
     const closeSearchOverlay = () => {
-        searchOverlay.classList.remove('active');
-        if (!isCompactViewport() && !sidebarHiddenBeforeSearch) {
-            sidebar.classList.remove('hidden');
-            content.classList.remove('full-width');
+        setSearchVisibility(false);
+        clearTimeout(searchDebounceTimer);
+
+        if (searchHint) {
+            searchHint.textContent = '';
         }
+
+        searchResults.replaceChildren();
+
+        if (!isCompactViewport() && !sidebarHiddenBeforeSearch) {
+            setSidebarVisibility(false);
+        }
+
+        searchBtn.focus({ preventScroll: true });
     };
 
     applyViewportLayout(true);
@@ -69,9 +108,9 @@ export function setupReaderUi({
     });
 
     toggle.addEventListener('click', () => {
-        sidebar.classList.toggle('hidden');
-        content.classList.toggle('full-width');
-        searchOverlay.classList.remove('active');
+        const hidden = sidebar.classList.contains('hidden');
+        setSidebarVisibility(!hidden);
+        setSearchVisibility(false);
     });
 
     controls.addEventListener('click', (event) => {
@@ -89,40 +128,80 @@ export function setupReaderUi({
         }
 
         sidebarHiddenBeforeSearch = !isCompactViewport() && sidebar.classList.contains('hidden');
-        searchOverlay.classList.add('active');
-        sidebar.classList.add('hidden');
-        content.classList.add('full-width');
-        if (searchOverlay.classList.contains('active')) {
-            searchInput.focus();
-        }
+        setSearchVisibility(true);
+        setSidebarVisibility(true);
+        searchInput.focus({ preventScroll: true });
     });
 
     closeSearch.addEventListener('click', closeSearchOverlay);
 
     searchInput.addEventListener('input', (event) => {
         const query = event.target.value.trim();
-        const resultsContainer = document.getElementById('searchResults');
-        resultsContainer.innerHTML = '';
-        onSearchQuery(query, resultsContainer, closeSearchOverlay);
+        searchResults.replaceChildren();
+        clearTimeout(searchDebounceTimer);
+
+        if (!query) {
+            if (searchHint) {
+                searchHint.textContent = '';
+            }
+            return;
+        }
+
+        if (!hasMinimumQueryWords(query, MIN_READER_SEARCH_WORDS)) {
+            if (searchHint) {
+                searchHint.textContent = READER_MIN_SEARCH_WORDS_MESSAGE;
+            }
+            return;
+        }
+
+        if (searchHint) {
+            searchHint.textContent = '';
+        }
+
+        searchDebounceTimer = setTimeout(() => {
+            onSearchQuery(query, searchResults, closeSearchOverlay);
+        }, 180);
     });
 
-    const favBtn = document.getElementById('favBtn');
+    document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        if (!searchOverlay.classList.contains('active')) return;
+        closeSearchOverlay();
+    });
+
+    document.addEventListener('pointerdown', (event) => {
+        if (!searchOverlay.classList.contains('active')) return;
+        const target = event.target;
+        if (searchOverlay.contains(target)) return;
+        if (searchBtn.contains(target)) return;
+        closeSearchOverlay();
+    });
+
     const bookId = new URLSearchParams(window.location.search).get('book');
 
-    if (bookId) {
-        const updateFavoriteIcon = () => {
-            if (isFavoriteBook(bookId)) {
-                favBtn.innerHTML = bookmarkIcons.active;
-                favBtn.classList.add('is-active');
-            } else {
-                favBtn.innerHTML = bookmarkIcons.inactive;
-                favBtn.classList.remove('is-active');
-            }
-        };
+    const updateFavoriteIcon = () => {
+        if (!bookId) {
+            favBtn.disabled = true;
+            favBtn.setAttribute('aria-disabled', 'true');
+            applyFavoriteIcon(favBtn, false);
+            return;
+        }
 
-        updateFavoriteIcon();
+        favBtn.disabled = false;
+        favBtn.removeAttribute('aria-disabled');
+        applyFavoriteIcon(favBtn, isFavoriteBook(bookId));
+    };
+
+    updateFavoriteIcon();
+
+    if (bookId) {
         favBtn.addEventListener('click', () => {
             onToggleFavorite(bookId);
+            updateFavoriteIcon();
+        });
+
+        window.addEventListener('storage', (event) => {
+            if (event.key !== 'shiaLibFavs') return;
             updateFavoriteIcon();
         });
     }

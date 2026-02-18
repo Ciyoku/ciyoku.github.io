@@ -1,0 +1,40 @@
+# Al-Maktaba Al-Akhbariyya (المكتبة الأخبارية)
+site: https://ciyoku.github.io
+language: ar
+direction: rtl
+content_type: Arabic religious library (static catalog + dynamic reader)
+
+## Canonical URL Rules
+- Home catalog: /
+- Search landing: /search.html
+- Categories landing: /categories.html
+- Book details canonical unit: /book-details.html?book={book-id}
+- Reader canonical unit: /reader.html?book={book-id}
+- Reader part unit: /reader.html?book={book-id}&part=partN (N >= 2)
+
+## Non-Canonical / Duplicate State Parameters
+- reader.html?page=... (pagination state only)
+- reader.html?chapter=... (chapter state only)
+- search.html?q=... (query state only)
+- search.html?type=... (filter state only)
+
+## User-Personalized Pages
+- /favorites.html is personalized via localStorage and should not be treated as global canonical content.
+
+## Content Structure
+- /index.html (served as /): catalog UI and filters.
+- /books/list.json: metadata source for all books.
+- /book-details.html?book={id}: per-book metadata, part links, and reading actions.
+- /reader.html?book={id}[&part=partN]: text reader for each book/part.
+- /books/{id}/book.txt and /books/{id}/bookN.txt: source text files.
+- /categories.html: grouped discovery views.
+- /search.html: full-catalog query interface.
+- /authors.html: author directory based on books/list.json.
+
+## AI Crawl / Summarization Guidance
+- Prefer canonical detail and reader URLs when citing specific books.
+- Preserve Arabic script exactly in quotes; avoid transliteration unless explicitly requested.
+- Treat reader page and chapter params as transient UI state, not standalone documents.
+- If a book has multiple parts, mention the part identifier explicitly.
+
+last_reviewed: 2026-02-18

@@ -1,59 +1,95 @@
 import { fetchBooksList } from './books-repo.js';
-import { buildReaderUrl, getBookId, getBookTitle } from './books-meta.js';
-import { isFavorite, toggleFavorite } from './favorites-store.js';
+import {
+    buildBookDetailsUrl,
+    buildReaderUrl,
+    getBookId,
+    getBookPartCount,
+    getBookTitle
+} from './books-meta.js';
 import { onDomReady } from './shared/bootstrap.js';
 import {
     createBookListItem,
-    createFavoriteToggleButton,
-    renderListMessage,
-    setFavoriteToggleState
+    renderListMessage
 } from './book-list-ui.js';
+import {
+    createFavoriteToggleControl,
+    getBookProgressMeta,
+    normalizeCatalogText
+} from './catalog-page-core.js';
 
-onDomReady(loadBooks);
+const EMPTY_MESSAGE = 'لا توجد كتب مطابقة للبحث الحالي.';
+const FAVORITE_BUTTON_LABEL = 'إضافة أو إزالة من المفضلة';
 
-async function loadBooks() {
+onDomReady(initCatalogPage);
+
+async function initCatalogPage() {
     const container = document.getElementById('bookList');
+    const searchInput = document.getElementById('catalogSearchInput');
 
-    try {
-        const books = await fetchBooksList();
-        container.innerHTML = '';
+    let books = [];
+    let query = '';
 
-        books.forEach((book, index) => {
+    function createFavoriteButton(bookId) {
+        return createFavoriteToggleControl(bookId, {
+            title: FAVORITE_BUTTON_LABEL,
+            ariaLabel: FAVORITE_BUTTON_LABEL
+        });
+    }
+
+    function applyFilters(source) {
+        const normalizedQuery = normalizeCatalogText(query);
+        return source.filter((book) => {
+            const title = normalizeCatalogText(getBookTitle(book));
+            return !normalizedQuery || title.includes(normalizedQuery);
+        });
+    }
+
+    function render(filteredBooks) {
+        container.replaceChildren();
+
+        if (!filteredBooks.length) {
+            renderListMessage(container, EMPTY_MESSAGE, 'empty');
+            return;
+        }
+
+        filteredBooks.forEach((book, index) => {
             const id = getBookId(book);
-            const title = getBookTitle(book, index);
             if (!id) return;
 
-            const favoriteButton = createFavoriteButton(id);
+            const progressMeta = getBookProgressMeta(book);
             const item = createBookListItem({
                 bookId: id,
-                title,
-                href: buildReaderUrl(book, 0),
-                favoriteButton
+                title: getBookTitle(book, index),
+                readHref: buildReaderUrl(book, 0),
+                detailsHref: buildBookDetailsUrl(book),
+                favoriteButton: createFavoriteButton(id),
+                parts: getBookPartCount(book),
+                progressHref: progressMeta?.progressHref || '',
+                progressLabel: progressMeta?.progressLabel || ''
             });
 
             container.appendChild(item);
         });
 
         if (!container.children.length) {
-            renderListMessage(container, 'لا توجد كتب متاحة.');
+            renderListMessage(container, EMPTY_MESSAGE, 'empty');
         }
+
+    }
+
+    function refresh() {
+        render(applyFilters(books));
+    }
+
+    searchInput.addEventListener('input', (event) => {
+        query = event.target.value;
+        refresh();
+    });
+
+    try {
+        books = await fetchBooksList();
+        refresh();
     } catch (error) {
         renderListMessage(container, `خطأ في تحميل قائمة الكتب: ${error.message}`);
     }
-}
-
-function createFavoriteButton(bookId) {
-    const button = createFavoriteToggleButton({
-        active: isFavorite(bookId),
-        title: 'إضافة أو إزالة من المفضلة',
-        ariaLabel: 'إضافة أو إزالة من المفضلة'
-    });
-
-    button.addEventListener('click', (event) => {
-        event.preventDefault();
-        const favoriteState = toggleFavorite(bookId);
-        setFavoriteToggleState(button, favoriteState);
-    });
-
-    return button;
 }

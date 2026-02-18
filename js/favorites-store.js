@@ -1,64 +1,73 @@
 const STORAGE_KEY = 'shiaLibFavs';
+let favoritesCache = null;
 
 function normalizeId(id) {
     return String(id ?? '').trim();
 }
 
-function readFavorites() {
+function sanitizeFavorites(values) {
+    if (!Array.isArray(values)) return [];
+    const unique = new Set();
+    values.forEach((value) => {
+        const id = normalizeId(value);
+        if (id) unique.add(id);
+    });
+    return [...unique];
+}
+
+function readFavoritesFromStorage() {
     try {
         const raw = localStorage.getItem(STORAGE_KEY);
         const parsed = raw ? JSON.parse(raw) : [];
-        if (!Array.isArray(parsed)) return [];
-        const unique = new Set();
-        parsed.forEach((value) => {
-            const id = normalizeId(value);
-            if (id) unique.add(id);
-        });
-        return [...unique];
+        return sanitizeFavorites(parsed);
     } catch (_) {
         return [];
     }
 }
 
-function writeFavorites(ids) {
-    const clean = [];
-    const seen = new Set();
-    ids.forEach((value) => {
-        const id = normalizeId(value);
-        if (!id || seen.has(id)) return;
-        seen.add(id);
-        clean.push(id);
-    });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
-    return clean;
+function getCachedFavorites() {
+    if (!Array.isArray(favoritesCache)) {
+        favoritesCache = readFavoritesFromStorage();
+    }
+    return favoritesCache;
+}
+
+function writeFavoritesToStorage(ids) {
+    const clean = sanitizeFavorites(ids);
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
+        favoritesCache = clean;
+        return true;
+    } catch (_) {
+        return false;
+    }
 }
 
 function getFavorites() {
-    return readFavorites();
+    return [...getCachedFavorites()];
 }
 
 function isFavorite(id) {
     const target = normalizeId(id);
     if (!target) return false;
-    return readFavorites().includes(target);
+    return getCachedFavorites().includes(target);
 }
 
 function setFavorite(id, shouldFavorite) {
     const target = normalizeId(id);
     if (!target) return false;
 
-    const current = readFavorites();
+    const current = [...getCachedFavorites()];
     const hasTarget = current.includes(target);
 
     if (shouldFavorite && !hasTarget) {
-        current.push(target);
-        writeFavorites(current);
-        return true;
+        const next = [...current, target];
+        return writeFavoritesToStorage(next) ? true : hasTarget;
     }
 
     if (!shouldFavorite && hasTarget) {
-        writeFavorites(current.filter((value) => value !== target));
-        return false;
+        const next = current.filter((value) => value !== target);
+        return writeFavoritesToStorage(next) ? false : hasTarget;
     }
 
     return hasTarget;
@@ -66,6 +75,13 @@ function setFavorite(id, shouldFavorite) {
 
 function toggleFavorite(id) {
     return setFavorite(id, !isFavorite(id));
+}
+
+if (typeof window !== 'undefined') {
+    window.addEventListener('storage', (event) => {
+        if (event.key !== STORAGE_KEY) return;
+        favoritesCache = readFavoritesFromStorage();
+    });
 }
 
 export {

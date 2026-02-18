@@ -1,49 +1,64 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المكتبة الأخبارية</title>
+    <title>المكتبة الأخبارية | فهرس الكتب</title>
+    <meta name="description" content="فهرس المكتبة الأخبارية للكتب العربية مع وصول مباشر للقارئ والبحث والمفضلة.">
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+    <link rel="canonical" href="https://ciyoku.github.io/">
+    <meta property="og:locale" content="ar_AR">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="المكتبة الأخبارية | فهرس الكتب">
+    <meta property="og:description" content="فهرس الكتب في المكتبة الأخبارية مع تصفح سريع للأجزاء واستكمال القراءة.">
+    <meta property="og:url" content="https://ciyoku.github.io/">
+    <meta property="og:site_name" content="المكتبة الأخبارية">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="المكتبة الأخبارية | فهرس الكتب">
+    <meta name="twitter:description" content="فهرس الكتب في المكتبة الأخبارية مع تصفح سريع للأجزاء واستكمال القراءة.">
+    <meta name="theme-color" content="#08090b">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; upgrade-insecure-requests">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/catalog.css">
 </head>
 
-<body>
-    <header>
-        <div class="logo">
-            <span>المكتبة الأخبارية</span>
-        </div>
-        <div class="header-actions">
-            <a href="favorites.html" class="header-star-link" title="المفضلة" aria-label="المفضلة">
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path d="M12 2.25l2.86 5.79 6.39.93-4.62 4.5 1.09 6.37L12 16.84l-5.72 3 1.09-6.37-4.62-4.5 6.39-.93L12 2.25z"></path>
-                </svg>
-            </a>
-        </div>
+<body class="books-page">
+    <a class="skip-link" href="#mainContent">تجاوز إلى المحتوى</a>
+
+    <header class="site-header site-header-nav">
+        <div class="logo"><a href="index.html" class="site-logo"><span>المكتبة</span><span>الأخبارية</span></a></div>
+
+                
     </header>
 
-    <main class="container">
+    <noscript>
+        <div class="noscript-notice">يحتاج الموقع إلى تفعيل JavaScript لعرض الفهرس والتصفح التفاعلي.</div>
+    </noscript>
+
+    <main class="container" id="mainContent">
         <section class="catalog-intro">
-            <h1>الكتب</h1>
-    <p>قائمة بالعناوين المتاحة حاليًا، على أن تُدرج الفصول والتقسيمات التفصيلية في التحديثات القادمة.</p>
+            <p>تصفح الكتب المتاحة وفلترها حسب العنوان، ثم انتقل مباشرة إلى القراءة.</p>
+        </section>
+
+        <section class="catalog-tools" aria-label="أدوات الفهرس">
+            <div class="tool-group">
+                <label for="catalogSearchInput">بحث بعنوان الكتاب</label>
+                <input id="catalogSearchInput" class="catalog-search-input" type="search" placeholder="اكتب اسم الكتاب..." autocomplete="off">
+            </div>
         </section>
 
         <ul class="book-list" id="bookList">
             <li class="book-list-loading">جاري تحميل العناوين...</li>
         </ul>
     </main>
-
-    <footer class="site-footer">
-        <div class="footer-copy">© 2026 المكتبة الأخبارية.</div>
-        <nav class="footer-nav" aria-label="تنقل التذييل">
-            <a href="index.html">الرئيسية</a>
-            <a href="favorites.html">المفضلات</a>
-        </nav>
-        <p class="footer-hint">تلميح: اضغط نجمة الكتاب لإضافته إلى المفضلة أو إزالته منها.</p>
-    </footer>
-
-    <script type="module" src="js/index.js"></script>
+<script type="module" src="js/index.js"></script>
+    <script type="module" src="js/shared/site-shell.js"></script>
 </body>
 
 </html>
+
+

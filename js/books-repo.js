@@ -7,17 +7,25 @@ function normalizeBook(book, index = 0) {
     const id = getBookId(book);
     const title = getBookTitle(book, index);
     const parts = getBookPartCount(book);
-    return {
+    return Object.freeze({
         ...book,
         id,
         title,
         parts
-    };
+    });
 }
 
 function validateBooksArray(books) {
     if (!Array.isArray(books)) {
         throw new Error('صيغة قائمة الكتب غير صحيحة');
+    }
+}
+
+function assertSafeBooksContentType(response) {
+    const contentType = String(response.headers.get('content-type') ?? '').toLowerCase();
+    // Reject obvious HTML payloads while allowing tolerant static-server content types.
+    if (contentType.includes('text/html')) {
+        throw new Error('نوع ملف قائمة الكتب غير متوقع');
     }
 }
 
@@ -27,10 +35,17 @@ export async function fetchBooksList(options = {}) {
         return booksCache;
     }
 
-    const response = await fetch(BOOKS_LIST_PATH);
+    const response = await fetch(BOOKS_LIST_PATH, {
+        headers: {
+            Accept: 'application/json'
+        }
+    });
+
     if (!response.ok) {
         throw new Error('تعذر تحميل قائمة الكتب');
     }
+
+    assertSafeBooksContentType(response);
 
     const rawBooks = await response.json();
     validateBooksArray(rawBooks);
@@ -39,6 +54,6 @@ export async function fetchBooksList(options = {}) {
         .map((book, index) => normalizeBook(book, index))
         .filter((book) => Boolean(book.id));
 
-    booksCache = normalizedBooks;
-    return normalizedBooks;
+    booksCache = Object.freeze(normalizedBooks);
+    return booksCache;
 }

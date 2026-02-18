@@ -23,28 +23,44 @@ export function renderPartSelector({ state, onSelectPart, onAfterSelectPart }) {
 
     if (state.bookParts.length <= 1) {
         container.hidden = true;
+        container.replaceChildren();
         return;
     }
 
     container.hidden = false;
-    const buttonsHtml = state.bookParts
-        .map((part, index) => (
-            `<button type="button" class="part-selector-btn" data-part-index="${index}">${part.label}</button>`
-        ))
-        .join('');
+    container.replaceChildren();
 
-    container.innerHTML = `
-        <div class="part-selector-title">الأجزاء</div>
-        ${buttonsHtml}
-    `;
+    const title = document.createElement('div');
+    title.className = 'part-selector-title';
+    title.textContent = 'الأجزاء';
+    container.appendChild(title);
 
-    container.querySelectorAll('[data-part-index]').forEach((button) => {
+    state.bookParts.forEach((part, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'part-selector-btn';
+        button.dataset.partIndex = String(index);
+        button.textContent = part.label;
+
+        if (part.status === 'loading') {
+            button.disabled = true;
+            button.classList.add('is-loading');
+        }
+
+        if (part.status === 'missing') {
+            button.disabled = true;
+            button.classList.add('is-missing');
+        }
+
+        button.title = part.status === 'missing' ? 'هذا الجزء غير متوفر' : part.label;
+
         button.addEventListener('click', () => {
             onSelectPart(Number(button.dataset.partIndex));
             if (typeof onAfterSelectPart === 'function') {
                 onAfterSelectPart();
             }
         });
+        container.appendChild(button);
     });
 
     updatePartSelector(state);

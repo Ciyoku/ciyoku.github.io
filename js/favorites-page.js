@@ -1,71 +1,114 @@
 import { fetchBooksList } from './books-repo.js';
-import { buildReaderUrl, getBookId, getBookTitle } from './books-meta.js';
-import { getFavorites, setFavorite } from './favorites-store.js';
+import {
+    buildBookDetailsUrl,
+    buildReaderUrl,
+    getBookId,
+    getBookPartCount,
+    getBookTitle
+} from './books-meta.js';
+import { getFavorites } from './favorites-store.js';
 import { onDomReady } from './shared/bootstrap.js';
+import { hasMinimumQueryWords } from './shared/query-words.js';
 import {
     createBookListItem,
-    createFavoriteToggleButton,
     renderListMessage
 } from './book-list-ui.js';
+import {
+    createFavoriteRemoveControl,
+    getBookProgressMeta,
+    normalizeCatalogText
+} from './catalog-page-core.js';
 
 const EMPTY_FAVORITES_MESSAGE = 'لا توجد كتب مفضلة حتى الآن.';
+const REMOVE_FAVORITE_LABEL = 'إزالة من المفضلة';
+const MIN_SEARCH_WORDS = 2;
+const MIN_SEARCH_WORDS_MESSAGE = 'اكتب كلمتين أو أكثر لبدء البحث.';
 
-onDomReady(loadFavorites);
+onDomReady(initFavoritesPage);
 
-async function loadFavorites() {
+async function initFavoritesPage() {
     const container = document.getElementById('favoritesList');
-    const favoriteIds = new Set(getFavorites());
+    const searchInput = document.getElementById('favoritesSearchInput');
 
-    if (!favoriteIds.size) {
-        renderListMessage(container, EMPTY_FAVORITES_MESSAGE);
-        return;
+    let books = [];
+    let favoriteIds = new Set(getFavorites());
+    let query = '';
+
+    function createRemoveButton(bookId) {
+        return createFavoriteRemoveControl(bookId, {
+            title: REMOVE_FAVORITE_LABEL,
+            ariaLabel: REMOVE_FAVORITE_LABEL,
+            onRemove: () => {
+                favoriteIds.delete(bookId);
+                render();
+            }
+        });
     }
 
-    try {
-        const books = await fetchBooksList();
-        const favoriteBooks = books.filter((book) => favoriteIds.has(getBookId(book)));
-        container.innerHTML = '';
-
-        favoriteBooks.forEach((book, index) => {
+    function getVisibleFavorites(normalizedQuery) {
+        return books.filter((book) => {
             const id = getBookId(book);
-            const title = getBookTitle(book, index);
+            if (!favoriteIds.has(id)) return false;
+
+            if (!normalizedQuery) return true;
+            return normalizeCatalogText(getBookTitle(book)).includes(normalizedQuery);
+        });
+    }
+
+    function render() {
+        const normalizedQuery = normalizeCatalogText(query);
+        const belowMinWordCount = normalizedQuery && !hasMinimumQueryWords(query, MIN_SEARCH_WORDS);
+        const visibleBooks = belowMinWordCount ? [] : getVisibleFavorites(normalizedQuery);
+        container.replaceChildren();
+
+        if (!visibleBooks.length) {
+            if (belowMinWordCount) {
+                renderListMessage(container, MIN_SEARCH_WORDS_MESSAGE, 'empty');
+                return;
+            }
+
+            renderListMessage(container, EMPTY_FAVORITES_MESSAGE, 'empty');
+            return;
+        }
+
+        visibleBooks.forEach((book, index) => {
+            const id = getBookId(book);
             if (!id) return;
 
+            const progressMeta = getBookProgressMeta(book);
             const item = createBookListItem({
                 bookId: id,
-                title,
-                href: buildReaderUrl(book, 0),
-                favoriteButton: createRemoveButton(id, container)
+                title: getBookTitle(book, index),
+                readHref: buildReaderUrl(book, 0),
+                detailsHref: buildBookDetailsUrl(book),
+                favoriteButton: createRemoveButton(id),
+                parts: getBookPartCount(book),
+                progressHref: progressMeta?.progressHref || '',
+                progressLabel: progressMeta?.progressLabel || ''
             });
 
             container.appendChild(item);
         });
 
         if (!container.children.length) {
-            renderListMessage(container, EMPTY_FAVORITES_MESSAGE);
+            renderListMessage(container, EMPTY_FAVORITES_MESSAGE, 'empty');
         }
+    }
+
+    searchInput.addEventListener('input', (event) => {
+        query = event.target.value;
+        render();
+    });
+
+    if (!favoriteIds.size) {
+        renderListMessage(container, EMPTY_FAVORITES_MESSAGE, 'empty');
+        return;
+    }
+
+    try {
+        books = await fetchBooksList();
+        render();
     } catch (error) {
         renderListMessage(container, `خطأ في تحميل المفضلة: ${error.message}`);
     }
-}
-
-function createRemoveButton(bookId, container) {
-    const button = createFavoriteToggleButton({
-        active: true,
-        title: 'إزالة من المفضلة',
-        ariaLabel: 'إزالة من المفضلة'
-    });
-
-    button.addEventListener('click', (event) => {
-        event.preventDefault();
-        setFavorite(bookId, false);
-        const row = button.closest('.book-list-item');
-        if (row) row.remove();
-
-        if (!container.children.length) {
-            renderListMessage(container, EMPTY_FAVORITES_MESSAGE);
-        }
-    });
-
-    return button;
 }

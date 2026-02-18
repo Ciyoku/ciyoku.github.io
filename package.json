@@ -1,0 +1,18 @@
+{
+  "name": "mktba",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static Arabic digital library with catalog, search, and reader experience.",
+  "type": "module",
+  "scripts": {
+    "check:js": "node --check js/search-page.js && node --check js/search/constants.js && node --check js/search/excerpt.js && node --check js/search/full-text-session.js && node --check js/reader/reader-app.js && node --check js/reader/view.js && node --check js/reader/part-state.js && node --check js/reader/part-loader.js",
+    "check:books": "node scripts/validate-books.mjs",
+    "check:shell": "node scripts/validate-shell.mjs",
+    "check": "npm run check:js && npm run check:books && npm run check:shell",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
+

@@ -1,11 +1,12 @@
 import { parsePartParam, toPartParam } from '../books-meta.js';
+import { SITE_URL } from '../site-config.js';
 
 function getFallbackHref() {
     if (typeof window !== 'undefined' && window.location?.href) {
         return window.location.href;
     }
 
-    return 'https://example.invalid/reader.html';
+    return `${SITE_URL}/reader.html`;
 }
 
 function parsePageIndex(pageValue) {
@@ -22,10 +23,17 @@ export function parseReaderStateFromSearchParams(searchParams) {
         ? searchParams
         : new URLSearchParams(searchParams ?? '');
 
+    const partRaw = params.get('part');
+    const pageRaw = params.get('page');
+    const chapterRaw = params.get('chapter');
+
     return {
-        partIndex: parsePartParam(params.get('part')),
-        pageIndex: parsePageIndex(params.get('page')),
-        chapterId: params.get('chapter') || ''
+        partIndex: parsePartParam(partRaw),
+        pageIndex: parsePageIndex(pageRaw),
+        chapterId: chapterRaw || '',
+        hasExplicitPart: params.has('part'),
+        hasExplicitPage: params.has('page'),
+        hasExplicitChapter: params.has('chapter')
     };
 }
 
@@ -55,9 +63,23 @@ export function getRequestedReaderState() {
     return parseReaderStateFromSearchParams(new URLSearchParams(window.location.search));
 }
 
-export function syncReaderStateToUrl(state) {
+export function updateReaderStateInUrl(state, options = {}) {
+    const mode = options.mode === 'push' ? 'push' : 'replace';
     const url = buildReaderUrlForState(state, window.location.href);
     if (!url) return;
 
-    history.replaceState(null, '', `${url.pathname}?${url.searchParams.toString()}`);
+    const nextUrl = `${url.pathname}?${url.searchParams.toString()}`;
+    const currentUrl = `${window.location.pathname}${window.location.search}`;
+    if (nextUrl === currentUrl) return;
+
+    if (mode === 'push') {
+        history.pushState(null, '', nextUrl);
+        return;
+    }
+
+    history.replaceState(null, '', nextUrl);
+}
+
+export function syncReaderStateToUrl(state) {
+    updateReaderStateInUrl(state, { mode: 'replace' });
 }
