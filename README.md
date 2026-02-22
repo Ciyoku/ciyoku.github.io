@@ -1,6 +1,6 @@
 # المكتبة الأخبارية
 
-Static Arabic digital library with:
+Static Islamic Shia digital library with:
 - catalog browsing
 - category and author navigation
 - full-text search (runtime scanning, no prebuilt index)
