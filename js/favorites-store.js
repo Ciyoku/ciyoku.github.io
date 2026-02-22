@@ -85,7 +85,6 @@ if (typeof window !== 'undefined') {
 }
 
 export {
-    STORAGE_KEY,
     getFavorites,
     isFavorite,
     setFavorite,

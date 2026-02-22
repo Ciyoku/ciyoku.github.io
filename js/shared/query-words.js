@@ -1,6 +1,6 @@
-export const DEFAULT_MIN_QUERY_WORDS = 2;
+const DEFAULT_MIN_QUERY_WORDS = 2;
 
-export function countQueryWords(value) {
+function countQueryWords(value) {
     return String(value ?? '')
         .trim()
         .split(/\s+/u)

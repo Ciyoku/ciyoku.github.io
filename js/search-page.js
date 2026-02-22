@@ -1,7 +1,6 @@
 ﻿import { fetchBookPart } from './book-content.js';
 import { fetchBooksList } from './books-repo.js';
 import {
-    buildBookDetailsUrl,
     buildReaderUrlWithState,
     getBookId,
     getBookPartCount,
@@ -79,9 +78,7 @@ async function initSearchPage() {
         return {
             bookId: getBookId(book),
             title: getBookTitle(book),
-            parts,
             readHref: buildReaderUrlWithState(book, { partIndex, pageIndex }),
-            detailsHref: buildBookDetailsUrl(book),
             locationLabel: buildLocationLabel(parts, partIndex, pageIndex),
             excerpt: createMatchExcerpt(line, normalizedQuery, { radius: EXCERPT_RADIUS })
         };
@@ -191,9 +188,7 @@ async function initSearchPage() {
             bookId: match.bookId,
             title: match.title,
             readHref: match.readHref,
-            detailsHref: '',
-            favoriteButton: null,
-            parts: match.parts
+            favoriteButton: null
         });
 
         const card = item.querySelector('.book-card');
@@ -204,7 +199,6 @@ async function initSearchPage() {
             titleLink.href = match.readHref;
         }
 
-        card.querySelector('.book-actions')?.remove();
         card.classList.add('search-result-card');
         card.setAttribute('role', 'link');
         card.setAttribute('tabindex', '0');

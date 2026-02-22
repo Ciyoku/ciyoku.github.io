@@ -18,7 +18,7 @@ function collectAuthorNames(value, output) {
     output.push(normalized);
 }
 
-export function getBookAuthors(book) {
+function getBookAuthors(book) {
     const values = [
         book?.author,
         book?.authors,

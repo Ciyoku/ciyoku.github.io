@@ -18,7 +18,7 @@ function parsePageIndex(pageValue) {
     return requestedPage - 1;
 }
 
-export function parseReaderStateFromSearchParams(searchParams) {
+function parseReaderStateFromSearchParams(searchParams) {
     const params = searchParams instanceof URLSearchParams
         ? searchParams
         : new URLSearchParams(searchParams ?? '');
@@ -37,7 +37,7 @@ export function parseReaderStateFromSearchParams(searchParams) {
     };
 }
 
-export function buildReaderUrlForState(state, currentHref = getFallbackHref()) {
+function buildReaderUrlForState(state, currentHref = getFallbackHref()) {
     if (!state.currentBookId) return null;
 
     const url = new URL(currentHref);
@@ -78,8 +78,4 @@ export function updateReaderStateInUrl(state, options = {}) {
     }
 
     history.replaceState(null, '', nextUrl);
-}
-
-export function syncReaderStateToUrl(state) {
-    updateReaderStateInUrl(state, { mode: 'replace' });
 }

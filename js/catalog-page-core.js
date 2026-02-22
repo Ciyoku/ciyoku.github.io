@@ -1,37 +1,13 @@
 import {
-    buildReaderUrlWithState,
-    getBookCategories,
-    getBookId
+    getBookCategories
 } from './books-meta.js';
 import { createFavoriteToggleButton, setFavoriteToggleState } from './book-list-ui.js';
 import { isFavorite, setFavorite, toggleFavorite } from './favorites-store.js';
-import { loadBookProgress } from './reader/persistence.js';
 
-export const UNCATEGORIZED_FILTER = '__uncategorized';
+const UNCATEGORIZED_FILTER = '__uncategorized';
 
 export function normalizeCatalogText(value) {
     return String(value ?? '').normalize('NFC').toLowerCase().trim();
-}
-
-export function getBookProgressMeta(book) {
-    const progress = loadBookProgress(getBookId(book));
-    if (!progress) return null;
-
-    const safePartIndex = Number.isInteger(progress.partIndex) && progress.partIndex >= 0
-        ? progress.partIndex
-        : 0;
-    const safePageIndex = Number.isInteger(progress.pageIndex) && progress.pageIndex >= 0
-        ? progress.pageIndex
-        : 0;
-
-    return {
-        progressHref: buildReaderUrlWithState(book, {
-            partIndex: safePartIndex,
-            pageIndex: safePageIndex,
-            chapterId: progress.chapterId
-        }),
-        progressLabel: 'متابعة القراءة'
-    };
 }
 
 export function filterBooksByCategory(sourceBooks, categoryMode = 'all') {

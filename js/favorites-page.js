@@ -1,9 +1,7 @@
 import { fetchBooksList } from './books-repo.js';
 import {
-    buildBookDetailsUrl,
     buildReaderUrl,
     getBookId,
-    getBookPartCount,
     getBookTitle
 } from './books-meta.js';
 import { getFavorites } from './favorites-store.js';
@@ -15,7 +13,6 @@ import {
 } from './book-list-ui.js';
 import {
     createFavoriteRemoveControl,
-    getBookProgressMeta,
     normalizeCatalogText
 } from './catalog-page-core.js';
 
@@ -75,16 +72,11 @@ async function initFavoritesPage() {
             const id = getBookId(book);
             if (!id) return;
 
-            const progressMeta = getBookProgressMeta(book);
             const item = createBookListItem({
                 bookId: id,
                 title: getBookTitle(book, index),
                 readHref: buildReaderUrl(book, 0),
-                detailsHref: buildBookDetailsUrl(book),
-                favoriteButton: createRemoveButton(id),
-                parts: getBookPartCount(book),
-                progressHref: progressMeta?.progressHref || '',
-                progressLabel: progressMeta?.progressLabel || ''
+                favoriteButton: createRemoveButton(id)
             });
 
             container.appendChild(item);

@@ -101,24 +101,6 @@
     flex-shrink: 0;
 }
 
-.inline-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.45rem;
-}
-
-.inline-links a {
-    border: 1px solid var(--border-color);
-    border-radius: 999px;
-    padding: 0.24rem 0.65rem;
-    font-size: var(--text-xs);
-}
-
-.inline-links a:hover {
-    border-color: var(--accent-color);
-    color: var(--accent-color);
-}
-
 .category-layout {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
@@ -209,28 +191,6 @@
 
 .category-section.is-active .category-side-count {
     color: #8fcfff;
-}
-
-.category-books {
-    list-style: none;
-    display: grid;
-    gap: 0.35rem;
-    border-top: 1px solid var(--border-color);
-    padding: 0.55rem 0.9rem 0.82rem;
-    background: #171717;
-}
-
-.category-book-link {
-    display: inline-block;
-    color: var(--text-color);
-    font-size: var(--text-sm);
-    border-radius: var(--radius-sm);
-    padding: 0.22rem 0.32rem;
-}
-
-.category-book-link:hover {
-    color: var(--accent-color);
-    background: #1f1f1f;
 }
 
 .book-details-shell {
@@ -345,84 +305,14 @@
     color: var(--accent-color);
 }
 
-.contact-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 0.8rem;
-}
-
-.contact-card {
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: 0.85rem 0.95rem;
-    background: var(--bg-elevated);
-}
-
-.contact-card h3 {
-    color: var(--accent-color);
-    font-size: var(--text-sm);
-    margin-bottom: 0.35rem;
-}
-
-.contact-card p,
-.contact-card a {
-    font-size: var(--text-sm);
-    color: #dce1ea;
-}
-
-.contact-card a:hover {
-    color: var(--accent-color);
-}
-
-.policy-list {
-    list-style: decimal;
-    padding-inline-start: 1.2rem;
-    display: grid;
-    gap: 0.6rem;
-}
-
-.not-found {
-    text-align: center;
-    padding: 2.5rem 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    background: var(--sidebar-bg);
-}
-
-.not-found h1 {
-    color: var(--accent-color);
-    margin-bottom: 0.6rem;
-}
-
-.not-found p {
-    color: var(--text-muted);
-    margin-bottom: 0.8rem;
-}
-
-.not-found a {
-    border: 1px solid var(--border-color);
-    border-radius: 999px;
-    padding: 0.35rem 0.8rem;
-}
-
-.not-found a:hover {
-    border-color: var(--accent-color);
-    color: var(--accent-color);
-}
-
 @media (max-width: 640px) {
     .page-intro,
-    .content-card,
-    .contact-card {
+    .content-card {
         padding: 0.8rem;
     }
 
     .category-row {
         padding: 0.7rem 0.72rem;
-    }
-
-    .category-books {
-        padding: 0.5rem 0.72rem 0.72rem;
     }
 
     .book-details-header {

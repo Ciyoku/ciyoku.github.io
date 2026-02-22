@@ -72,27 +72,3 @@ export function clearBookPartCache(bookId) {
         }
     });
 }
-
-// Backward-compatible helper for callers that still need bulk loading.
-export async function fetchBookParts(bookId, expectedPartCount = 1) {
-    const normalizedBookId = normalizeBookPathId(bookId);
-    if (!normalizedBookId) {
-        throw new Error(BOOK_LOAD_ERROR_MESSAGE);
-    }
-
-    const totalParts = Number.isInteger(expectedPartCount) && expectedPartCount > 1 ? expectedPartCount : 1;
-    const parts = [];
-
-    for (let index = 0; index < totalParts; index++) {
-        const partText = await fetchBookPart(bookId, index);
-        if (partText === null) {
-            if (index === 0) {
-                throw new Error(BOOK_LOAD_ERROR_MESSAGE);
-            }
-            break;
-        }
-        parts.push(partText);
-    }
-
-    return parts;
-}

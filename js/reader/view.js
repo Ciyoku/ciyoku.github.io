@@ -1,7 +1,7 @@
 import { setCanonicalUrl } from '../shared/seo.js';
 
-export const CHOOSE_BOOK_TITLE = 'اختر كتابًا';
-export const CHOOSE_BOOK_MESSAGE = 'لم يتم اختيار كتاب.';
+const CHOOSE_BOOK_TITLE = 'اختر كتابًا';
+const CHOOSE_BOOK_MESSAGE = 'لم يتم اختيار كتاب.';
 export const UNKNOWN_BOOK_TITLE = 'كتاب غير معروف';
 export const READER_TITLE_SUFFIX = 'القارئ';
 

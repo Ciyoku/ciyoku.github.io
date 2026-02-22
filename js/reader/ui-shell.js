@@ -19,7 +19,7 @@ function getReaderShellElements() {
     };
 }
 
-export function isCompactViewport() {
+function isCompactViewport() {
     return window.matchMedia('(max-width: 900px)').matches;
 }
 

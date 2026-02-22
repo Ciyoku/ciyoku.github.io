@@ -1,16 +1,13 @@
 import { fetchBooksList } from './books-repo.js';
 import {
-    buildBookDetailsUrl,
     buildReaderUrl,
     getBookId,
-    getBookPartCount,
     getBookTitle
 } from './books-meta.js';
 import { buildAuthorPageUrl, filterBooksByAuthor, groupBooksByAuthor } from './authors-data.js';
 import { createBookListItem, renderListMessage } from './book-list-ui.js';
 import {
     createFavoriteToggleControl,
-    getBookProgressMeta,
     normalizeCatalogText
 } from './catalog-page-core.js';
 import { onDomReady } from './shared/bootstrap.js';
@@ -54,16 +51,11 @@ function renderAuthorBooks(container, books) {
         const id = getBookId(book);
         if (!id) return;
 
-        const progressMeta = getBookProgressMeta(book);
         const item = createBookListItem({
             bookId: id,
             title: getBookTitle(book, index),
             readHref: buildReaderUrl(book, 0),
-            detailsHref: buildBookDetailsUrl(book),
-            favoriteButton: createFavoriteButton(id),
-            parts: getBookPartCount(book),
-            progressHref: progressMeta?.progressHref || '',
-            progressLabel: progressMeta?.progressLabel || ''
+            favoriteButton: createFavoriteButton(id)
         });
 
         container.appendChild(item);

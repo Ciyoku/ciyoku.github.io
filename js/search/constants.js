@@ -1,5 +1,4 @@
 export const EMPTY_SEARCH_MESSAGE = 'لا توجد نتائج مطابقة للبحث الحالي.';
-export const FAVORITE_BUTTON_LABEL = 'إضافة أو إزالة من المفضلة';
 export const INITIAL_RESULTS_COUNT = 10;
 export const RESULTS_BATCH_SIZE = 10;
 export const INPUT_DEBOUNCE_MS = 220;

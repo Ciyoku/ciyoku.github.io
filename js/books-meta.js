@@ -111,15 +111,6 @@ function buildReaderUrlWithState(book, state = {}) {
     return `reader.html?${params.toString()}`;
 }
 
-function buildBookDetailsUrl(book) {
-    const id = getBookId(book);
-    if (!id) return 'book-details.html';
-
-    const params = new URLSearchParams();
-    params.set('book', id);
-    return `book-details.html?${params.toString()}`;
-}
-
 export {
     getBookId,
     getBookPartCount,
@@ -127,8 +118,6 @@ export {
     getBookTitle,
     parsePartParam,
     toPartParam,
-    normalizePartIndex,
     buildReaderUrl,
-    buildReaderUrlWithState,
-    buildBookDetailsUrl
+    buildReaderUrlWithState
 };

@@ -1,12 +1,3 @@
-function escapeHtml(value) {
-    return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-}
-
 const ARABIC_DIACRITICS = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u08D4-\u08FF]/g;
 const SINGLE_ARABIC_DIACRITIC = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u08D4-\u08FF]/;
 const DEFAULT_PARSE_CHUNK_SIZE = 700;
@@ -107,24 +98,6 @@ export function createHighlightedTextFragment(line, normalizedQuery) {
     return fragment;
 }
 
-export function highlightTextIgnoringDiacritics(line, normalizedQuery) {
-    const { source, ranges } = findDiacriticsInsensitiveRanges(line, normalizedQuery);
-    if (!ranges.length) return escapeHtml(source);
-
-    let html = '';
-    let cursor = 0;
-
-    ranges.forEach(([start, end]) => {
-        if (start < cursor) return;
-        html += escapeHtml(source.slice(cursor, start));
-        html += `<span class="highlight">${escapeHtml(source.slice(start, end))}</span>`;
-        cursor = end;
-    });
-
-    html += escapeHtml(source.slice(cursor));
-    return html;
-}
-
 function normalizeChunkSize(value) {
     if (Number.isInteger(value) && value > 0) return value;
     return DEFAULT_PARSE_CHUNK_SIZE;
@@ -181,30 +154,6 @@ async function yieldToBrowser() {
     await new Promise((resolve) => {
         setTimeout(resolve, 0);
     });
-}
-
-export function parseBookContent(text) {
-    const context = createParserContext(text);
-    let currentChapter = {
-        title: 'بداية الكتاب',
-        id: ''
-    };
-
-    context.pages.forEach((pageText, pageIndex) => {
-        context.pageBlocks.push([]);
-        const lines = String(pageText).split('\n');
-
-        lines.forEach((line) => {
-            currentChapter = parseLine(context, line, pageIndex, currentChapter);
-        });
-    });
-
-    return {
-        pages: context.pages,
-        pageBlocks: context.pageBlocks,
-        chapters: context.chapters,
-        searchIndex: context.searchIndex
-    };
 }
 
 export async function parseBookContentAsync(text, options = {}) {
