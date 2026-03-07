@@ -23,7 +23,8 @@ async function initCatalogPage() {
     const listController = createBookListPageController({
         container,
         emptyMessage: EMPTY_MESSAGE,
-        createReadHref: (book) => buildReaderUrl(book, 0)
+        createReadHref: (book) => buildReaderUrl(book, 0),
+        showDownloadButton: false
     });
 
     function applyFilters(source) {

@@ -5,7 +5,8 @@ export function createBookListItem({
     bookId,
     title,
     readHref,
-    partCount = 1
+    partCount = 1,
+    showDownloadButton = true
 }) {
     const item = document.createElement('li');
     item.className = 'book-list-item fade-in';
@@ -24,23 +25,26 @@ export function createBookListItem({
     card.appendChild(link);
     item.appendChild(card);
 
-    const actions = document.createElement('div');
-    actions.className = 'book-item-actions';
+    if (showDownloadButton) {
+        const actions = document.createElement('div');
+        actions.className = 'book-item-actions';
 
-    const downloadButton = document.createElement('button');
-    downloadButton.className = 'book-download-button';
-    downloadButton.textContent = 'Download';
-    downloadButton.setAttribute('aria-label', `Download ${title}`);
-    actions.appendChild(downloadButton);
+        const downloadButton = document.createElement('button');
+        downloadButton.className = 'book-download-button';
+        downloadButton.textContent = 'Download';
+        downloadButton.setAttribute('aria-label', `Download ${title}`);
+        actions.appendChild(downloadButton);
 
-    attachBookDownloadButton(downloadButton, {
-        bookId,
-        title,
-        partCount,
-        readHref
-    });
+        attachBookDownloadButton(downloadButton, {
+            bookId,
+            title,
+            partCount,
+            readHref
+        });
 
-    item.appendChild(actions);
+        item.appendChild(actions);
+    }
+
     return item;
 }
 

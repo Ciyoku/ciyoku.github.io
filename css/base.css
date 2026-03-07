@@ -99,6 +99,14 @@ svg {
     height: auto;
 }
 
+.lucide {
+    display: block;
+    flex-shrink: 0;
+    fill: none;
+    stroke: currentColor;
+    pointer-events: none;
+}
+
 a {
     text-decoration: none;
     color: inherit;
@@ -366,6 +374,7 @@ a {
 .icon {
     cursor: pointer;
     font-size: var(--text-base);
+    line-height: 0 !important;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -404,6 +413,12 @@ a {
     flex-shrink: 0;
     display: block;
     margin: 0 auto;
+}
+
+.top-nav-link .lucide-library-big,
+.icon .lucide-book-down,
+.icon .lucide-book-check {
+    stroke-width: 1.1 !important;
 }
 
 .container {

@@ -4,7 +4,8 @@ import { createBookListItem, renderListMessage } from '../../shared/book-list-ui
 export function createBookListPageController({
     container,
     emptyMessage = 'لا توجد كتب متاحة حاليًا.',
-    createReadHref
+    createReadHref,
+    showDownloadButton = true
 }) {
     if (!container || typeof container.replaceChildren !== 'function') {
         throw new Error('A valid list container is required');
@@ -29,7 +30,8 @@ export function createBookListPageController({
                 bookId: id,
                 title: getBookTitle(book, index),
                 readHref: typeof createReadHref === 'function' ? createReadHref(book) : 'reader.html',
-                partCount: getBookPartCount(book)
+                partCount: getBookPartCount(book),
+                showDownloadButton
             });
 
             fragment.appendChild(item);

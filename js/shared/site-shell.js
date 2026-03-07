@@ -4,7 +4,7 @@ import { registerPwaServiceWorker } from './pwa.js';
 
 const MAIN_SECTIONS = Object.freeze([
     { href: 'search.html', label: 'بحث', icon: 'search' },
-    { href: 'index.html', label: 'كتب', icon: 'book' },
+    { href: 'index.html', label: 'كتب', icon: 'library-big' },
     { href: 'authors.html', label: 'مؤلفون', icon: 'users' },
     { href: 'categories.html', label: 'أقسام', icon: 'folder-tree' }
 ]);

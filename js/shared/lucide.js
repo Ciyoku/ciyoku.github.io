@@ -16,6 +16,23 @@ const book = [
     ['path', { d: 'M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20' }]
 ];
 
+const bookDown = [
+    ['path', { d: 'M12 13V7' }],
+    ['path', { d: 'M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20' }],
+    ['path', { d: 'm9 10 3 3 3-3' }]
+];
+
+const bookCheck = [
+    ['path', { d: 'M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20' }],
+    ['path', { d: 'm9 9.5 2 2 4-4' }]
+];
+
+const libraryBig = [
+    ['rect', { x: '3', y: '3', width: '8', height: '18', rx: '1' }],
+    ['path', { d: 'M7 3v18' }],
+    ['path', { d: 'M20.4 18.9c.2.5-.1 1.1-.6 1.3l-1.9.7c-.5.2-1.1-.1-1.3-.6L11.1 5.1c-.2-.5.1-1.1.6-1.3l1.9-.7c.5-.2 1.1.1 1.3.6Z' }]
+];
+
 const users = [
     ['path', { d: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2' }],
     ['path', { d: 'M16 3.128a4 4 0 0 1 0 7.744' }],
@@ -55,6 +72,9 @@ const BUILTIN_ICONS = Object.freeze({
     search,
     'folder-tree': folderTree,
     book,
+    'book-down': bookDown,
+    'book-check': bookCheck,
+    'library-big': libraryBig,
     users,
     bookmark,
     'book-heart': bookHeart,
@@ -77,7 +97,7 @@ function createSvgElement(tagName, attributes = {}) {
     return node;
 }
 
-function createIconNode(iconName, iconDefinition, attrs) {
+function createIconNode(iconName, iconDefinition, attrs, sourceElement = null) {
     const svg = createSvgElement('svg', {
         xmlns: SVG_NAMESPACE,
         viewBox: '0 0 24 24',
@@ -91,6 +111,25 @@ function createIconNode(iconName, iconDefinition, attrs) {
     svg.setAttribute('aria-hidden', 'true');
     svg.setAttribute('focusable', 'false');
     svg.classList.add('lucide', `lucide-${iconName}`);
+
+    if (sourceElement instanceof Element) {
+        const sourceClass = String(sourceElement.getAttribute('class') || '').trim();
+        if (sourceClass) {
+            sourceClass.split(/\s+/).forEach((className) => {
+                if (!className) return;
+                svg.classList.add(className);
+            });
+        }
+
+        if (sourceElement.id) {
+            svg.id = sourceElement.id;
+        }
+
+        const inlineStyle = sourceElement.getAttribute('style');
+        if (inlineStyle) {
+            svg.setAttribute('style', inlineStyle);
+        }
+    }
 
     iconDefinition.forEach(([tagName, attributes]) => {
         svg.appendChild(createSvgElement(tagName, attributes));
@@ -137,7 +176,7 @@ function createIcons({
         const iconDefinition = iconMap[iconName];
         if (!iconDefinition) return;
 
-        const iconNode = createIconNode(iconName, iconDefinition, attrs);
+        const iconNode = createIconNode(iconName, iconDefinition, attrs, element);
         element.replaceWith(iconNode);
     });
 }
@@ -149,6 +188,9 @@ export function renderLucideIcons(root = document) {
             search,
             folderTree,
             book,
+            bookDown,
+            bookCheck,
+            libraryBig,
             users,
             bookmark,
             bookHeart,
