@@ -121,7 +121,7 @@ function createReaderDownloadController() {
     async function syncButtonState(book, syncToken) {
         const bookId = getBookId(book);
         if (!bookId) {
-            setButtonVisualState({ downloaded: false, downloading: false });
+            setButtonVisualState({ downloaded: false, downloading: false, disabled: true });
             return;
         }
 

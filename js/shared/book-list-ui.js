@@ -1,12 +1,9 @@
 import { createIosLoader } from './loading-indicator.js';
-import { attachBookDownloadButton } from '../features/offline/book-download-button.js';
 
 export function createBookListItem({
     bookId,
     title,
-    readHref,
-    partCount = 1,
-    showDownloadButton = false
+    readHref
 }) {
     const item = document.createElement('li');
     item.className = 'book-list-item fade-in';
@@ -24,26 +21,6 @@ export function createBookListItem({
 
     card.appendChild(link);
     item.appendChild(card);
-
-    if (showDownloadButton) {
-        const actions = document.createElement('div');
-        actions.className = 'book-item-actions';
-
-        const downloadButton = document.createElement('button');
-        downloadButton.className = 'book-download-button';
-        downloadButton.textContent = 'Download';
-        downloadButton.setAttribute('aria-label', `Download ${title}`);
-        actions.appendChild(downloadButton);
-
-        attachBookDownloadButton(downloadButton, {
-            bookId,
-            title,
-            partCount,
-            readHref
-        });
-
-        item.appendChild(actions);
-    }
 
     return item;
 }

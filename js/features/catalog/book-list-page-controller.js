@@ -1,11 +1,10 @@
-import { getBookId, getBookPartCount, getBookTitle } from '../../core/books-meta.js';
+import { getBookId, getBookTitle } from '../../core/books-meta.js';
 import { createBookListItem, renderListMessage } from '../../shared/book-list-ui.js';
 
 export function createBookListPageController({
     container,
     emptyMessage = 'لا توجد كتب متاحة حاليًا.',
-    createReadHref,
-    showDownloadButton = false
+    createReadHref
 }) {
     if (!container || typeof container.replaceChildren !== 'function') {
         throw new Error('A valid list container is required');
@@ -29,9 +28,7 @@ export function createBookListPageController({
             const item = createBookListItem({
                 bookId: id,
                 title: getBookTitle(book, index),
-                readHref: typeof createReadHref === 'function' ? createReadHref(book) : 'reader.html',
-                partCount: getBookPartCount(book),
-                showDownloadButton
+                readHref: typeof createReadHref === 'function' ? createReadHref(book) : 'reader.html'
             });
 
             fragment.appendChild(item);

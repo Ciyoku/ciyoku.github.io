@@ -84,7 +84,6 @@ async function initSearchPage() {
         return {
             bookId: getBookId(book),
             title: getBookTitle(book),
-            partCount: parts,
             readHref: buildReaderUrlWithState(book, { partIndex, pageIndex }),
             locationLabel: buildLocationLabel(parts, partIndex, pageIndex),
             excerpt: createMatchExcerpt(line, normalizedQuery, { radius: EXCERPT_RADIUS })
@@ -217,8 +216,7 @@ async function initSearchPage() {
         const item = createBookListItem({
             bookId: match.bookId,
             title: match.title,
-            readHref: match.readHref,
-            partCount: match.partCount
+            readHref: match.readHref
         });
 
         const card = item.querySelector('.book-card');
