@@ -2,7 +2,7 @@ import { fetchBooksList } from '../../core/books-repo.js';
 import { getBookId, getBookPartCount, getBookTitle } from '../../core/books-meta.js';
 import { clearBookPartCache, fetchBookPart } from '../../core/book-content.js';
 import { createHighlightedTextFragment, parseBookContentAsync } from '../../core/reader-parser.js';
-import { toArabicIndicNumber, parsePageNumberInput } from '../../shared/number-format.js';
+import { toArabicIndicNumber } from '../../shared/number-format.js';
 import { renderLucideIcons } from '../../shared/lucide.js';
 import { createIosLoader } from '../../shared/loading-indicator.js';
 import { getRequestedReaderState, updateReaderStateInUrl } from './url-state.js';
@@ -194,8 +194,8 @@ function createReaderDownloadController() {
 const pagination = createPaginationController({
     state,
     toArabicIndicNumber,
-    parsePageNumberInput,
-    updateReaderStateInUrl
+    updateReaderStateInUrl,
+    renderLucideIcons
 });
 
 function updateReaderSeo() {

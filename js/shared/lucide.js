@@ -5,6 +5,24 @@ const search = [
     ['circle', { cx: '11', cy: '11', r: '8' }]
 ];
 
+const chevronRight = [
+    ['path', { d: 'm9 18 6-6-6-6' }]
+];
+
+const chevronLeft = [
+    ['path', { d: 'm15 18-6-6 6-6' }]
+];
+
+const chevronsRight = [
+    ['path', { d: 'm6 17 5-5-5-5' }],
+    ['path', { d: 'm13 17 5-5-5-5' }]
+];
+
+const chevronsLeft = [
+    ['path', { d: 'm18 17-5-5 5-5' }],
+    ['path', { d: 'm11 17-5-5 5-5' }]
+];
+
 const folderTree = [
     ['path', { d: 'M20 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2.5a1 1 0 0 1-.8-.4l-.9-1.2A1 1 0 0 0 15 3h-2a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1Z' }],
     ['path', { d: 'M20 21a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-2.9a1 1 0 0 1-.88-.55l-.42-.85a1 1 0 0 0-.92-.6H13a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1Z' }],
@@ -70,6 +88,10 @@ const arrowDownWideNarrow = [
 
 const BUILTIN_ICONS = Object.freeze({
     search,
+    'chevron-right': chevronRight,
+    'chevron-left': chevronLeft,
+    'chevrons-right': chevronsRight,
+    'chevrons-left': chevronsLeft,
     'folder-tree': folderTree,
     book,
     'book-down': bookDown,
@@ -186,6 +208,10 @@ export function renderLucideIcons(root = document) {
         root,
         icons: {
             search,
+            chevronRight,
+            chevronLeft,
+            chevronsRight,
+            chevronsLeft,
             folderTree,
             book,
             bookDown,

@@ -337,28 +337,37 @@
 .page-nav {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 0.9rem;
+    justify-content: center;
+    gap: 0.55rem;
     margin: 2rem 0 2.5rem;
     font-family: var(--font-ui);
     font-size: var(--text-sm);
 }
 
 .page-nav-center {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
+    min-width: 8.5rem;
+    text-align: center;
 }
 
 .page-btn {
     background: var(--sidebar-bg);
     color: var(--text-color);
     border: 1px solid var(--border-color);
-    padding: 0.55rem 1rem;
     border-radius: 999px;
     cursor: pointer;
     font-family: var(--font-ui);
-    font-size: var(--text-sm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.65rem;
+    height: 2.65rem;
+    padding: 0;
+}
+
+.page-btn .lucide {
+    width: 1.08rem;
+    height: 1.08rem;
+    stroke-width: 1.35 !important;
 }
 
 .page-btn:hover:not(:disabled) {
@@ -375,26 +384,10 @@
     color: var(--accent-color);
     font-weight: 600;
     font-size: var(--text-sm);
-}
-
-.page-jump-input {
-    width: 6.2rem;
     text-align: center;
-    background: var(--sidebar-bg);
-    color: var(--text-color);
-    border: 1px solid var(--border-color);
-    border-radius: 999px;
-    padding: 0.35rem 0.6rem;
-    font-family: var(--font-ui);
-    font-size: var(--text-sm);
-}
-
-.page-jump-input.is-valid {
-    border-color: var(--accent-color);
-}
-
-.page-jump-input.is-invalid {
-    border-color: var(--danger-color);
+    line-height: 1.35;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
 }
 
 @media (max-width: 1100px) {
@@ -489,24 +482,22 @@
     }
 
     .page-nav {
-        flex-wrap: wrap;
         margin: 1.4rem 0 1.7rem;
+        gap: 0.4rem;
     }
 
     .page-nav-center {
-        width: 100%;
-        justify-content: space-between;
-        order: -1;
+        min-width: 7.3rem;
     }
 
     .page-btn {
-        flex: 1 1 calc(50% - 0.5rem);
-        text-align: center;
-        padding: 0.5rem 0.75rem;
+        width: 2.35rem;
+        height: 2.35rem;
     }
 
-    .page-jump-input {
-        width: 4.8rem;
+    .page-btn .lucide {
+        width: 0.95rem;
+        height: 0.95rem;
     }
 
 }

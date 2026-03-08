@@ -2,80 +2,76 @@
     return Math.min(Math.max(value, min), max);
 }
 
-function buildPageNav({ parsePageNumberInput, toArabicIndicNumber, onNavigate }) {
+function createNavIconButton({ className, iconName, label }) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `page-btn ${className}`;
+    button.setAttribute('aria-label', label);
+    button.title = label;
+
+    const iconHost = document.createElement('span');
+    iconHost.setAttribute('data-lucide', iconName);
+    iconHost.setAttribute('aria-hidden', 'true');
+    button.appendChild(iconHost);
+
+    return button;
+}
+
+function buildPageNav({ onNavigate, renderLucideIcons }) {
     const root = document.createElement('div');
     root.className = 'page-nav';
 
-    const prevButton = document.createElement('button');
-    prevButton.type = 'button';
-    prevButton.className = 'page-btn prev-page-btn';
-    prevButton.textContent = 'السابق';
+    const firstButton = createNavIconButton({
+        className: 'first-page-btn',
+        iconName: 'chevrons-right',
+        label: 'الانتقال إلى بداية الكتاب'
+    });
+
+    const prevButton = createNavIconButton({
+        className: 'prev-page-btn',
+        iconName: 'chevron-right',
+        label: 'الصفحة السابقة'
+    });
 
     const center = document.createElement('div');
     center.className = 'page-nav-center';
 
     const pageNumberDisplay = document.createElement('div');
     pageNumberDisplay.className = 'page-number-display';
+    pageNumberDisplay.setAttribute('aria-live', 'polite');
 
-    const pageJumpInput = document.createElement('input');
-    pageJumpInput.className = 'page-jump-input';
-    pageJumpInput.setAttribute('aria-label', 'انتقال إلى رقم الصفحة');
-    pageJumpInput.setAttribute('inputmode', 'numeric');
-    pageJumpInput.setAttribute('autocomplete', 'off');
-    pageJumpInput.setAttribute('spellcheck', 'false');
+    const nextButton = createNavIconButton({
+        className: 'next-page-btn',
+        iconName: 'chevron-left',
+        label: 'الصفحة التالية'
+    });
 
-    const nextButton = document.createElement('button');
-    nextButton.type = 'button';
-    nextButton.className = 'page-btn next-page-btn';
-    nextButton.textContent = 'التالي';
+    const lastButton = createNavIconButton({
+        className: 'last-page-btn',
+        iconName: 'chevrons-left',
+        label: 'الانتقال إلى نهاية الكتاب'
+    });
 
     center.appendChild(pageNumberDisplay);
-    center.appendChild(pageJumpInput);
+    root.appendChild(firstButton);
     root.appendChild(prevButton);
     root.appendChild(center);
     root.appendChild(nextButton);
+    root.appendChild(lastButton);
 
-    let jumpTimer = null;
-    const tryJump = () => {
-        const enteredPage = parsePageNumberInput(pageJumpInput.value);
-        pageJumpInput.classList.remove('is-valid', 'is-invalid');
-        if (enteredPage === null) return;
-        onNavigate('jump', enteredPage - 1, pageJumpInput);
-    };
-
+    renderLucideIcons(root);
+    firstButton.addEventListener('click', () => onNavigate('first'));
     prevButton.addEventListener('click', () => onNavigate('prev'));
     nextButton.addEventListener('click', () => onNavigate('next'));
-
-    pageJumpInput.addEventListener('focus', () => {
-        pageJumpInput.select();
-    });
-
-    pageJumpInput.addEventListener('input', () => {
-        clearTimeout(jumpTimer);
-        jumpTimer = setTimeout(tryJump, 220);
-    });
-
-    pageJumpInput.addEventListener('keydown', (event) => {
-        if (event.key !== 'Enter') return;
-        clearTimeout(jumpTimer);
-        tryJump();
-    });
-
-    pageJumpInput.addEventListener('blur', () => {
-        clearTimeout(jumpTimer);
-        pageJumpInput.classList.remove('is-valid', 'is-invalid');
-    });
+    lastButton.addEventListener('click', () => onNavigate('last'));
 
     return {
         root,
+        firstButton,
         prevButton,
         nextButton,
         pageNumberDisplay,
-        pageJumpInput,
-        setValue(value) {
-            const localized = toArabicIndicNumber(value);
-            pageJumpInput.value = localized;
-        }
+        lastButton
     };
 }
 
@@ -96,9 +92,9 @@ function createBlockNode(block) {
 export function createPaginationController({
     state,
     toArabicIndicNumber,
-    parsePageNumberInput,
     updateReaderStateInUrl,
-    onPageRender
+    onPageRender,
+    renderLucideIcons
 }) {
     const chapterList = document.getElementById('chapterList');
     const readerContent = document.getElementById('readerContent');
@@ -145,11 +141,14 @@ export function createPaginationController({
 
     function updateNavState() {
         const totalPages = state.pageBlocks.length || 1;
+        const isAtFirstPage = state.currentPageIndex <= 0;
+        const isAtLastPage = state.currentPageIndex >= totalPages - 1;
         navs.forEach((nav) => {
-            nav.prevButton.disabled = state.currentPageIndex <= 0;
-            nav.nextButton.disabled = state.currentPageIndex >= totalPages - 1;
-            nav.pageNumberDisplay.textContent = `صفحة ${toArabicIndicNumber(state.currentPageIndex + 1)} / ${toArabicIndicNumber(totalPages)}`;
-            nav.setValue(state.currentPageIndex + 1);
+            nav.firstButton.disabled = isAtFirstPage;
+            nav.prevButton.disabled = isAtFirstPage;
+            nav.nextButton.disabled = isAtLastPage;
+            nav.lastButton.disabled = isAtLastPage;
+            nav.pageNumberDisplay.textContent = `${toArabicIndicNumber(state.currentPageIndex + 1)} / ${toArabicIndicNumber(totalPages)}`;
         });
     }
 
@@ -159,7 +158,12 @@ export function createPaginationController({
             resetLayoutState();
         }
 
-        const handleNavAction = (action, pageIndex, inputElement) => {
+        const handleNavAction = (action) => {
+            if (action === 'first') {
+                renderPage(0, { chapterId: '', historyMode: 'push' });
+                return;
+            }
+
             if (action === 'prev') {
                 renderPage(state.currentPageIndex - 1, { chapterId: '', historyMode: 'push' });
                 return;
@@ -170,29 +174,20 @@ export function createPaginationController({
                 return;
             }
 
-            if (action === 'jump') {
+            if (action === 'last') {
                 const totalPages = state.pageBlocks.length || 1;
-                if (pageIndex < 0 || pageIndex > totalPages - 1) {
-                    inputElement.classList.add('is-invalid');
-                    return;
-                }
-                inputElement.classList.add('is-valid');
-                if (pageIndex !== state.currentPageIndex) {
-                    renderPage(pageIndex, { chapterId: '', historyMode: 'push' });
-                }
+                renderPage(totalPages - 1, { chapterId: '', historyMode: 'push' });
             }
         };
 
         const topNav = buildPageNav({
-            parsePageNumberInput,
-            toArabicIndicNumber,
-            onNavigate: handleNavAction
+            onNavigate: handleNavAction,
+            renderLucideIcons
         });
 
         const bottomNav = buildPageNav({
-            parsePageNumberInput,
-            toArabicIndicNumber,
-            onNavigate: handleNavAction
+            onNavigate: handleNavAction,
+            renderLucideIcons
         });
 
         const contentBody = document.createElement('article');
