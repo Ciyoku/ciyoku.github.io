@@ -188,12 +188,17 @@
 }
 
 .reader-page {
+    --global-font-size: 19px;
+    --global-line-height: 33px;
     min-height: 10rem;
+    max-width: min(100%, 42rem);
+    margin-inline: auto;
 }
 
 .reader-page p {
-    line-height: 2.35 !important;
-    margin-bottom: 0.72rem;
+    font-size: var(--global-font-size) !important;
+    line-height: var(--global-line-height) !important;
+    margin-bottom: 0.84rem;
 }
 
 .reader-page p:last-child {
@@ -204,9 +209,9 @@
     color: var(--accent-color);
     text-align: center;
     margin: 2.5rem 0 1.8rem;
-    font-size: clamp(1.5rem, 1.3rem + 0.8vw, 1.92rem);
+    font-size: clamp(1.5rem, 1.3rem + 0.8vw, 1.92rem) !important;
     font-weight: 400;
-    line-height: 1.65 !important;
+    line-height: var(--global-line-height) !important;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 0.9rem;
 }
@@ -429,7 +434,7 @@
     }
 
     .reader-page p {
-        line-height: 2.2 !important;
+        line-height: var(--global-line-height) !important;
     }
 
     .chapter-heading {
@@ -470,7 +475,7 @@
     }
 
     .reader-page p {
-        line-height: 2.05 !important;
+        line-height: var(--global-line-height) !important;
     }
 
     .chapter-heading {

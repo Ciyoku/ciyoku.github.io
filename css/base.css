@@ -55,6 +55,8 @@
     --text-lg: 1.28rem;
     --text-xl: 1.52rem;
     --text-2xl: 2rem;
+    --global-font-size: 18px;
+    --global-line-height: 32px;
     --radius-sm: 4px;
     --radius-md: 6px;
 }
@@ -79,16 +81,16 @@ body {
     background: var(--bg-color);
     color: var(--text-color);
     font-family: var(--font-main);
-    font-size: var(--text-base);
+    font-size: var(--global-font-size);
     direction: rtl;
-    line-height: 1.8;
+    line-height: calc(var(--global-line-height) / var(--global-font-size));
     overflow-x: hidden;
 }
 
 body,
 body :where(h1, h2, h3, h4, h5, h6, p, a, span, li, label, input, select, button, textarea, option, dt, dd, div) {
-    font-size: 15.75px !important;
-    line-height: 21px !important;
+    font-size: var(--global-font-size) !important;
+    line-height: var(--global-line-height) !important;
 }
 
 img,
@@ -291,9 +293,9 @@ a {
 }
 
 .top-nav-link {
-    min-width: 4.55rem;
-    min-height: 2.95rem;
-    padding: 0.34rem 0.3rem;
+    min-width: 4.95rem;
+    min-height: 3.35rem;
+    padding: 0.2rem 0.28rem;
     border: 0;
     border-radius: 0;
     background: transparent;
@@ -301,8 +303,7 @@ a {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.22rem;
-    line-height: 1.1 !important;
+    gap: 0.18rem;
     text-align: center;
     color: var(--text-muted);
     transition: color 0.2s ease;
@@ -326,8 +327,8 @@ a {
 
 .top-nav-link span {
     display: block;
-    font-size: 14px !important;
-    line-height: 1.1 !important;
+    font-size: 17px !important;
+    line-height: 22px !important;
     white-space: nowrap;
     text-align: center;
     font-weight: 400;
@@ -573,9 +574,9 @@ a {
     }
 
     .top-nav-link {
-        min-width: 4.05rem;
-        min-height: 2.75rem;
-        padding: 0.28rem 0.2rem;
+        min-width: 4.55rem;
+        min-height: 3.15rem;
+        padding: 0.16rem 0.2rem;
     }
 
     .top-nav-link svg {
@@ -623,9 +624,9 @@ a {
     }
 
     .top-nav-link {
-        min-width: 3.75rem;
-        min-height: 2.6rem;
-        padding: 0.26rem 0.14rem;
+        min-width: 4.2rem;
+        min-height: 2.95rem;
+        padding: 0.14rem 0.14rem;
     }
 
     .icon {
