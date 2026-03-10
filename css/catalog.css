@@ -34,14 +34,7 @@
     color: var(--text-muted);
 }
 
-.search-intro-text {
-    inline-size: 100%;
-    font-weight: 700;
-    font-size: var(--text-xs) !important;
-}
-
-.catalog-search-input,
-.catalog-select {
+.catalog-search-input {
     width: 100%;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
@@ -50,35 +43,6 @@
     padding: 0.65rem 0.75rem;
     font-family: var(--font-ui);
     font-size: var(--text-sm);
-}
-
-.catalog-select-wrap {
-    position: relative;
-}
-
-.catalog-select {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-image: none;
-    padding-inline-end: 2.2rem;
-}
-
-.catalog-select::-ms-expand {
-    display: none;
-}
-
-.catalog-select-icon,
-.catalog-select-wrap .lucide-arrow-down-wide-narrow {
-    position: absolute;
-    inset-block-start: 50%;
-    inset-inline-end: 0.72rem;
-    transform: translateY(-50%);
-    width: 18px;
-    height: 18px;
-    color: var(--text-muted);
-    stroke-width: 1.6;
-    pointer-events: none;
 }
 
 .books-page .books-text-ads {
@@ -254,73 +218,6 @@
     justify-content: center;
 }
 
-.search-result-location {
-    color: var(--text-muted);
-    font-size: var(--text-xs);
-}
-
-.search-result-card {
-    cursor: pointer;
-}
-
-.search-result-card:focus-visible {
-    outline: 2px solid var(--accent-color);
-    outline-offset: 2px;
-}
-
-.search-result-snippet {
-    color: var(--text-color);
-    font-size: var(--text-sm);
-    line-height: 1.9;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    padding: 0.55rem 0.65rem;
-}
-
-.search-result-snippet .highlight {
-    background-color: var(--accent-weak);
-    color: var(--accent-color);
-    border-radius: 4px;
-    padding: 0 0.1rem;
-}
-
-.search-load-controls {
-    display: flex;
-    justify-content: center;
-    margin-top: 1rem;
-}
-
-.search-load-controls[hidden] {
-    display: none;
-}
-
-.search-load-more {
-    border: 1px solid var(--border-color);
-    border-radius: 999px;
-    background: var(--bg-elevated);
-    color: var(--text-color);
-    font-family: var(--font-ui);
-    font-size: var(--text-sm);
-    padding: 0.5rem 1.1rem;
-    cursor: pointer;
-    transition: border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
-}
-
-.search-load-more:hover {
-    border-color: var(--accent-color);
-    color: var(--accent-color);
-}
-
-.search-load-more:disabled {
-    opacity: 0.5;
-    cursor: wait;
-}
-
-.search-load-sentinel {
-    width: 100%;
-    height: 1px;
-}
 
 @media (max-width: 900px) {
     .catalog-tools {

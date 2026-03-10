@@ -1,4 +1,4 @@
-const SW_VERSION = '2026-03-07-1';
+const SW_VERSION = '2026-03-10-1';
 const APP_SHELL_CACHE = `app-shell-${SW_VERSION}`;
 const RUNTIME_CACHE = `runtime-${SW_VERSION}`;
 const BOOK_PART_CACHE = 'library-book-parts-v1';
@@ -7,7 +7,6 @@ const OFFLINE_FALLBACK_URL = '/index.html';
 const APP_SHELL_ASSETS = [
     '/',
     '/index.html',
-    '/search.html',
     '/authors.html',
     '/categories.html',
     '/author.html',
@@ -48,15 +47,10 @@ const APP_SHELL_ASSETS = [
     '/js/features/reader/ui-shell.js',
     '/js/features/reader/url-state.js',
     '/js/features/reader/view.js',
-    '/js/features/search/lib/constants.js',
-    '/js/features/search/lib/excerpt.js',
-    '/js/features/search/lib/full-text-session.js',
-    '/js/features/search/search-page.js',
     '/js/shared/arabic-search.js',
     '/js/shared/book-list-ui.js',
     '/js/shared/book-pages.js',
     '/js/shared/bootstrap.js',
-    '/js/shared/category-filter-ui.js',
     '/js/shared/loading-indicator.js',
     '/js/shared/lucide.js',
     '/js/shared/number-format.js',

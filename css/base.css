@@ -309,20 +309,16 @@ a {
     transition: color 0.2s ease;
 }
 
-.site-header.site-header-nav .top-nav-link[href='search.html'] {
+.site-header.site-header-nav .top-nav-link[href='index.html'] {
     order: 1;
 }
 
-.site-header.site-header-nav .top-nav-link[href='index.html'] {
+.site-header.site-header-nav .top-nav-link[href='authors.html'] {
     order: 2;
 }
 
-.site-header.site-header-nav .top-nav-link[href='authors.html'] {
-    order: 3;
-}
-
 .site-header.site-header-nav .top-nav-link[href='categories.html'] {
-    order: 4;
+    order: 3;
 }
 
 .top-nav-link span {
@@ -492,14 +488,6 @@ a {
 .ios-loader-accent {
     border-color: rgba(62, 166, 255, 0.26);
     border-top-color: var(--accent-color);
-}
-
-.search-load-more.is-loading {
-    min-width: 5.6rem;
-    min-height: 2.25rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
 }
 
 @keyframes iosSpin {

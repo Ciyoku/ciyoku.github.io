@@ -12,7 +12,6 @@ import {
     buildReaderUrlForState,
     parseReaderStateFromSearchParams
 } from '../js/features/reader/url-state.js';
-import { createMatchExcerpt } from '../js/features/search/lib/excerpt.js';
 import { normalizeArabicForSearch } from '../js/shared/arabic-search.js';
 
 const testCases = [];
@@ -136,18 +135,6 @@ test('reader-search: token indexing narrows candidates', () => {
     const result = searchInBookIndex(engine, 'حديث التوحيد');
     assert.equal(result.matches.length, 1);
     assert.equal(result.matches[0].line, 'الكافي حديث التوحيد');
-});
-
-test('search-excerpt: short text passthrough and long text clipping', () => {
-    const shortLine = 'هذا سطر قصير جدًا';
-    assert.equal(createMatchExcerpt(shortLine, normalizeArabicForSearch('سطر')), shortLine);
-
-    const longLine = `${'مقدمة طويلة '.repeat(20)}موضوع البحث المهم${' خاتمة '.repeat(20)}`;
-    const clipped = createMatchExcerpt(longLine, normalizeArabicForSearch('موضوع البحث'), { radius: 30 });
-
-    assert.ok(clipped.includes('موضوع البحث المهم'));
-    assert.ok(clipped.startsWith('…') || clipped.endsWith('…'));
-    assert.ok(clipped.length < longLine.length);
 });
 
 let passed = 0;

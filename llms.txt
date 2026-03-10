@@ -6,7 +6,6 @@ content_type: Arabic religious library (static catalog + dynamic reader)
 
 ## Canonical URL Rules
 - Home catalog: /
-- Search landing: /search.html
 - Categories landing: /categories.html
 - Authors landing: /authors.html
 - Reader canonical unit: /reader.html?book={book-id}
@@ -15,8 +14,6 @@ content_type: Arabic religious library (static catalog + dynamic reader)
 ## Non-Canonical / Duplicate State Parameters
 - reader.html?page=... (pagination state only)
 - reader.html?chapter=... (chapter state only)
-- search.html?q=... (query state only)
-- search.html?category=... (filter state only)
 
 ## Content Structure
 - /index.html (served as /): catalog UI and filters.
@@ -24,7 +21,6 @@ content_type: Arabic religious library (static catalog + dynamic reader)
 - /reader.html?book={id}[&part=partN]: text reader for each book/part.
 - /books/{id}/book.txt and /books/{id}/bookN.txt: source text files.
 - /categories.html: grouped discovery views.
-- /search.html: full-catalog query interface.
 - /authors.html: author directory based on books/list.json.
 
 ## AI Crawl / Summarization Guidance

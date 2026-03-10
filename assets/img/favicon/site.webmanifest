@@ -2,7 +2,7 @@
   "id": "/?source=pwa",
   "name": "Al-Maktaba Al-Ikhbariya",
   "short_name": "Al-Maktaba",
-  "description": "Offline-first Akhbari digital library with searchable books.",
+  "description": "Offline-first Akhbari digital library.",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "/index.html?source=pwa",
@@ -37,17 +37,6 @@
     {
       "name": "Books",
       "url": "/index.html",
-      "icons": [
-        {
-          "src": "/assets/img/favicon/android-chrome-192x192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "Search",
-      "url": "/search.html",
       "icons": [
         {
           "src": "/assets/img/favicon/android-chrome-192x192.png",

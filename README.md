@@ -3,7 +3,6 @@
 Static Islamic Shia digital library with:
 - catalog browsing
 - category and author navigation
-- full-text search (runtime scanning, no prebuilt index)
 - in-browser reader with chapters, parts, and page navigation
 
 ## Run locally

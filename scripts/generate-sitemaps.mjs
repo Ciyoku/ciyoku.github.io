@@ -15,7 +15,6 @@ const SITEMAP_READER_PATH = path.join(repoRoot, 'sitemap-reader.xml');
 const STATIC_PAGES = Object.freeze([
     '/',
     '/categories.html',
-    '/search.html',
     '/authors.html',
     '/reader.html'
 ]);

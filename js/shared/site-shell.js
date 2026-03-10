@@ -3,7 +3,6 @@ import { applyDefaultPageSeo } from './page-seo-defaults.js';
 import { registerPwaServiceWorker } from './pwa.js';
 
 const MAIN_SECTIONS = Object.freeze([
-    { href: 'search.html', label: 'بحث', icon: 'search' },
     { href: 'index.html', label: 'كتب', icon: 'library-big' },
     { href: 'authors.html', label: 'مؤلفون', icon: 'users' },
     { href: 'categories.html', label: 'أقسام', icon: 'folder-tree' }
@@ -11,7 +10,6 @@ const MAIN_SECTIONS = Object.freeze([
 
 const PAGE_TO_SECTION = Object.freeze({
     'index.html': 'index.html',
-    'search.html': 'search.html',
     'authors.html': 'authors.html',
     'author.html': 'authors.html',
     'categories.html': 'categories.html',

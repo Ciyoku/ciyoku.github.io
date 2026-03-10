@@ -2,7 +2,7 @@
   "name": "mktba",
   "version": "1.0.0",
   "private": true,
-  "description": "Static Arabic digital library with catalog, search, and reader experience.",
+  "description": "Static Arabic digital library with catalog and reader experience.",
   "type": "module",
   "scripts": {
     "sitemap:build": "node scripts/generate-sitemaps.mjs",

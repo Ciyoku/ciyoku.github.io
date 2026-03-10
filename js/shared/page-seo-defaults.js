@@ -11,13 +11,6 @@ const DEFAULT_PAGE_SEO = Object.freeze({
         robots: INDEXABLE_ROBOTS,
         ogType: 'website'
     },
-    'search.html': {
-        title: `البحث | ${SITE_NAME}`,
-        description: `صفحة البحث في ${SITE_NAME} للعثور على الكتب بسرعة حسب العنوان والتصنيف.`,
-        url: 'search.html',
-        robots: INDEXABLE_ROBOTS,
-        ogType: 'website'
-    },
     'authors.html': {
         title: `المؤلفون | ${SITE_NAME}`,
         description: `قائمة المؤلفين المتاحة في ${SITE_NAME} اعتمادًا على بيانات books/list.json.`,
