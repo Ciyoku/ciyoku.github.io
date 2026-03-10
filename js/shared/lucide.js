@@ -23,6 +23,22 @@ const chevronsLeft = [
     ['path', { d: 'm11 17-5-5 5-5' }]
 ];
 
+const listChevronsDownUp = [
+    ['path', { d: 'M4 6h10' }],
+    ['path', { d: 'M4 12h10' }],
+    ['path', { d: 'M4 18h10' }],
+    ['path', { d: 'm18 7 2 2 2-2' }],
+    ['path', { d: 'm18 17 2-2 2 2' }]
+];
+
+const listChevronsUpDown = [
+    ['path', { d: 'M4 6h10' }],
+    ['path', { d: 'M4 12h10' }],
+    ['path', { d: 'M4 18h10' }],
+    ['path', { d: 'm18 7 2-2 2 2' }],
+    ['path', { d: 'm18 17 2 2 2-2' }]
+];
+
 const folderTree = [
     ['path', { d: 'M20 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2.5a1 1 0 0 1-.8-.4l-.9-1.2A1 1 0 0 0 15 3h-2a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1Z' }],
     ['path', { d: 'M20 21a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-2.9a1 1 0 0 1-.88-.55l-.42-.85a1 1 0 0 0-.92-.6H13a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1Z' }],
@@ -92,6 +108,8 @@ const BUILTIN_ICONS = Object.freeze({
     'chevron-left': chevronLeft,
     'chevrons-right': chevronsRight,
     'chevrons-left': chevronsLeft,
+    'list-chevrons-down-up': listChevronsDownUp,
+    'list-chevrons-up-down': listChevronsUpDown,
     'folder-tree': folderTree,
     book,
     'book-down': bookDown,
@@ -212,6 +230,8 @@ export function renderLucideIcons(root = document) {
             chevronLeft,
             chevronsRight,
             chevronsLeft,
+            listChevronsDownUp,
+            listChevronsUpDown,
             folderTree,
             book,
             bookDown,

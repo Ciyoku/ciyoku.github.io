@@ -77,9 +77,10 @@ function buildPageNav({ onNavigate, renderLucideIcons }) {
 
 function createBlockNode(block) {
     if (block.type === 'heading') {
-        const heading = document.createElement('h2');
+        const isBook = block.level === 'book';
+        const heading = document.createElement(isBook ? 'h2' : 'h3');
         heading.id = block.id;
-        heading.className = 'chapter-heading';
+        heading.className = isBook ? 'book-heading' : 'chapter-heading';
         heading.textContent = block.text;
         return heading;
     }
@@ -101,6 +102,8 @@ export function createPaginationController({
     const navs = [];
     let pageContainer = null;
     let layoutReady = false;
+    const collapsedBooks = new Set();
+    let lastBookId = '';
 
     function isLayoutMounted() {
         if (!layoutReady || !pageContainer || !readerContent.contains(pageContainer)) {
@@ -128,15 +131,29 @@ export function createPaginationController({
 
     function updateActiveChapterHighlight() {
         const activeChapterId = state.currentChapterId || getNearestChapterIdForPage(state.currentPageIndex);
-        chapterList.querySelectorAll('.chapter-link').forEach((button) => {
+        let activeButton = null;
+        chapterList.querySelectorAll('[data-chapter-id]').forEach((button) => {
             const isActive = button.dataset.chapterId === activeChapterId;
             button.classList.toggle('is-active', isActive);
             if (isActive) {
                 button.setAttribute('aria-current', 'location');
+                activeButton = button;
             } else {
                 button.removeAttribute('aria-current');
             }
         });
+
+        if (!activeButton) return;
+        const sublist = activeButton.closest('.chapter-sublist');
+        if (!sublist || !sublist.hidden) return;
+        const bookItem = sublist.closest('.chapter-book');
+        const bookToggle = bookItem ? bookItem.querySelector('.chapter-book-toggle') : null;
+        if (!bookToggle) return;
+        bookToggle.setAttribute('aria-expanded', 'true');
+        sublist.hidden = false;
+        if (bookToggle.dataset.bookKey) {
+            collapsedBooks.delete(bookToggle.dataset.bookKey);
+        }
     }
 
     function updateNavState() {
@@ -260,8 +277,44 @@ export function createPaginationController({
         });
     }
 
+    function buildChapterGroups(chapters) {
+        const groups = [];
+        let activeGroup = null;
+
+        chapters.forEach((chapter) => {
+            const kind = chapter?.kind === 'book' ? 'book' : 'section';
+            if (kind === 'book') {
+                activeGroup = { book: chapter, sections: [] };
+                groups.push(activeGroup);
+                return;
+            }
+
+            if (!activeGroup) {
+                activeGroup = {
+                    book: {
+                        title: '',
+                        id: '',
+                        pageIndex: Number.isFinite(chapter?.pageIndex) ? chapter.pageIndex : 0,
+                        kind: 'book',
+                        implicit: true
+                    },
+                    sections: []
+                };
+                groups.push(activeGroup);
+            }
+
+            activeGroup.sections.push(chapter);
+        });
+
+        return groups;
+    }
+
     function renderSidebar(chapters, onChapterNavigate) {
         chapterList.replaceChildren();
+        if (state.currentBookId !== lastBookId) {
+            collapsedBooks.clear();
+            lastBookId = state.currentBookId;
+        }
 
         if (!chapters.length) {
             const empty = document.createElement('li');
@@ -271,28 +324,154 @@ export function createPaginationController({
             return;
         }
 
-        chapters.forEach((chapter, chapterIndex) => {
+        const hasBookHeadings = chapters.some((chapter) => chapter?.kind === 'book');
+        if (!hasBookHeadings) {
+            chapters.forEach((chapter) => {
+                const item = document.createElement('li');
+                item.className = 'chapter-item';
+
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'chapter-link chapter-section-link';
+                button.dataset.chapterId = chapter.id;
+                button.dataset.pageIndex = String(chapter.pageIndex);
+                button.textContent = chapter.title;
+
+                button.addEventListener('click', () => {
+                    goToPage(chapter.pageIndex, chapter.id, { historyMode: 'push' });
+                    if (typeof onChapterNavigate === 'function') {
+                        onChapterNavigate();
+                    }
+                });
+
+                item.appendChild(button);
+                chapterList.appendChild(item);
+            });
+            return;
+        }
+
+        const groups = buildChapterGroups(chapters);
+        const activeChapterId = state.currentChapterId || getNearestChapterIdForPage(state.currentPageIndex);
+
+        groups.forEach((group, groupIndex) => {
+            const book = group.book;
+            const isImplicitUntitled = !book.title && !book.id;
+            if (isImplicitUntitled) {
+                group.sections.forEach((section) => {
+                    const sectionItem = document.createElement('li');
+                    sectionItem.className = 'chapter-item';
+
+                    const sectionButton = document.createElement('button');
+                    sectionButton.type = 'button';
+                    sectionButton.className = 'chapter-link chapter-section-link';
+                    sectionButton.dataset.chapterId = section.id;
+                    sectionButton.dataset.pageIndex = String(section.pageIndex);
+                    sectionButton.textContent = section.title;
+
+                    sectionButton.addEventListener('click', () => {
+                        goToPage(section.pageIndex, section.id, { historyMode: 'push' });
+                        if (typeof onChapterNavigate === 'function') {
+                            onChapterNavigate();
+                        }
+                    });
+
+                    sectionItem.appendChild(sectionButton);
+                    chapterList.appendChild(sectionItem);
+                });
+                return;
+            }
+
+            const bookKey = book.id || `implicit-book-${groupIndex}`;
+            const containsActive = Boolean(
+                activeChapterId &&
+                    (book.id === activeChapterId ||
+                        group.sections.some((section) => section.id === activeChapterId))
+            );
+            const isCollapsed = containsActive ? false : collapsedBooks.has(bookKey);
+
             const item = document.createElement('li');
-            item.className = 'chapter-item';
+            item.className = 'chapter-book';
 
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'chapter-link';
-            button.dataset.chapterId = chapter.id;
-            button.dataset.pageIndex = String(chapter.pageIndex);
-            button.dataset.chapterNumber = String(chapterIndex + 1);
-            button.textContent = chapter.title;
+            const bookButton = document.createElement('button');
+            bookButton.type = 'button';
+            bookButton.className = 'chapter-book-toggle';
+            bookButton.setAttribute('aria-expanded', String(!isCollapsed));
+            bookButton.dataset.bookKey = bookKey;
+            if (book.id) {
+                bookButton.dataset.chapterId = book.id;
+            }
 
-            button.addEventListener('click', () => {
-                goToPage(chapter.pageIndex, chapter.id, { historyMode: 'push' });
-                if (typeof onChapterNavigate === 'function') {
-                    onChapterNavigate();
+            const expandedIcon = document.createElement('span');
+            expandedIcon.className = 'toc-icon is-expanded';
+            expandedIcon.setAttribute('data-lucide', 'list-chevrons-up-down');
+            expandedIcon.setAttribute('aria-hidden', 'true');
+
+            const collapsedIcon = document.createElement('span');
+            collapsedIcon.className = 'toc-icon is-collapsed';
+            collapsedIcon.setAttribute('data-lucide', 'list-chevrons-down-up');
+            collapsedIcon.setAttribute('aria-hidden', 'true');
+
+            const bookLabel = document.createElement('span');
+            bookLabel.className = 'toc-text';
+            bookLabel.textContent = book.title;
+
+            bookButton.appendChild(expandedIcon);
+            bookButton.appendChild(collapsedIcon);
+            bookButton.appendChild(bookLabel);
+
+            let sectionList = null;
+            if (group.sections.length) {
+                sectionList = document.createElement('ul');
+                sectionList.className = 'chapter-sublist';
+                sectionList.hidden = isCollapsed;
+                sectionList.id = `chapter-sublist-${bookKey}`;
+                bookButton.setAttribute('aria-controls', sectionList.id);
+
+                group.sections.forEach((section) => {
+                    const sectionItem = document.createElement('li');
+                    sectionItem.className = 'chapter-item';
+
+                    const sectionButton = document.createElement('button');
+                    sectionButton.type = 'button';
+                    sectionButton.className = 'chapter-link chapter-section-link';
+                    sectionButton.dataset.chapterId = section.id;
+                    sectionButton.dataset.pageIndex = String(section.pageIndex);
+                    sectionButton.textContent = section.title;
+
+                    sectionButton.addEventListener('click', () => {
+                        goToPage(section.pageIndex, section.id, { historyMode: 'push' });
+                        if (typeof onChapterNavigate === 'function') {
+                            onChapterNavigate();
+                        }
+                    });
+
+                    sectionItem.appendChild(sectionButton);
+                    sectionList.appendChild(sectionItem);
+                });
+            }
+
+            bookButton.addEventListener('click', () => {
+                const expanded = bookButton.getAttribute('aria-expanded') === 'true';
+                const nextExpanded = !expanded;
+                bookButton.setAttribute('aria-expanded', String(nextExpanded));
+                if (sectionList) {
+                    sectionList.hidden = !nextExpanded;
+                }
+                if (nextExpanded) {
+                    collapsedBooks.delete(bookKey);
+                } else {
+                    collapsedBooks.add(bookKey);
                 }
             });
 
-            item.appendChild(button);
+            item.appendChild(bookButton);
+            if (sectionList) {
+                item.appendChild(sectionList);
+            }
             chapterList.appendChild(item);
         });
+
+        renderLucideIcons(chapterList);
     }
 
     return {

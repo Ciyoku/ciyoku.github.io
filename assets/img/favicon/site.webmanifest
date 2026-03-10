@@ -2,7 +2,7 @@
   "id": "/?source=pwa",
   "name": "Al-Maktaba Al-Ikhbariya",
   "short_name": "Al-Maktaba",
-  "description": "Offline-first Arabic digital library with searchable books.",
+  "description": "Offline-first Akhbari digital library with searchable books.",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "/index.html?source=pwa",

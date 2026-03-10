@@ -14,6 +14,7 @@ export { normalizeArabicForSearch, splitBookPages };
  * @property {'heading'|'paragraph'} type
  * @property {string} text
  * @property {string} [id]
+ * @property {'book'|'section'} [level]
  */
 
 /**
@@ -21,6 +22,8 @@ export { normalizeArabicForSearch, splitBookPages };
  * @property {string} title
  * @property {string} id
  * @property {number} pageIndex
+ * @property {'book'|'section'} [kind]
+ * @property {string} [bookId]
  */
 
 /**
@@ -39,6 +42,7 @@ export { normalizeArabicForSearch, splitBookPages };
  * @property {Chapter[]} chapters
  * @property {SearchIndexEntry[]} searchIndex
  * @property {number} chapterIndex
+ * @property {number} bookIndex
  * @property {number} processedLines
  */
 
@@ -131,6 +135,7 @@ function createParserContext(text) {
         chapters: [],
         searchIndex: [],
         chapterIndex: 0,
+        bookIndex: 0,
         processedLines: 0
     };
 }
@@ -139,26 +144,63 @@ function createParserContext(text) {
  * @param {ParserContext} context
  * @param {string} line
  * @param {number} pageIndex
- * @param {{title: string, id: string}} currentChapter
- * @returns {{title: string, id: string}}
+ * @param {{book: {title: string, id: string}, section: {title: string, id: string} | null}} currentState
+ * @returns {{book: {title: string, id: string}, section: {title: string, id: string} | null}}
  */
-function parseLine(context, line, pageIndex, currentChapter) {
+function parseLine(context, line, pageIndex, currentState) {
     const trimmed = line.trim();
-    if (!trimmed) return currentChapter;
+    if (!trimmed) return currentState;
 
     if (trimmed.startsWith('##')) {
-        const title = trimmed.replace('##', '').trim();
+        const title = trimmed.replace(/^##+/, '').trim();
+        if (!title) return currentState;
         const id = `chap-${context.chapterIndex}`;
         context.pageBlocks[pageIndex].push({
             type: 'heading',
             id,
-            text: title
+            text: title,
+            level: 'section'
         });
-        context.chapters.push({ title, id, pageIndex });
+        context.chapters.push({
+            title,
+            id,
+            pageIndex,
+            kind: 'section',
+            bookId: currentState.book?.id || ''
+        });
         context.chapterIndex += 1;
         return {
-            title: title || currentChapter.title,
-            id
+            book: currentState.book,
+            section: {
+                title,
+                id
+            }
+        };
+    }
+
+    if (trimmed.startsWith('#')) {
+        const title = trimmed.replace(/^#+/, '').trim();
+        if (!title) return currentState;
+        const id = `book-${context.bookIndex}`;
+        context.pageBlocks[pageIndex].push({
+            type: 'heading',
+            id,
+            text: title,
+            level: 'book'
+        });
+        context.chapters.push({
+            title,
+            id,
+            pageIndex,
+            kind: 'book'
+        });
+        context.bookIndex += 1;
+        return {
+            book: {
+                title,
+                id
+            },
+            section: null
         };
     }
 
@@ -167,15 +209,16 @@ function parseLine(context, line, pageIndex, currentChapter) {
         text: trimmed
     });
 
+    const activeHeading = currentState.section || currentState.book || { title: '', id: '' };
     context.searchIndex.push({
         line: trimmed,
         normalizedLine: normalizeArabicForSearch(trimmed),
         pageIndex,
-        chapterTitle: currentChapter.title,
-        chapterId: currentChapter.id
+        chapterTitle: activeHeading.title,
+        chapterId: activeHeading.id
     });
 
-    return currentChapter;
+    return currentState;
 }
 
 /**
@@ -196,9 +239,12 @@ async function yieldToBrowser() {
 export async function parseBookContentAsync(text, options = {}) {
     const chunkSize = normalizeChunkSize(options.chunkSize);
     const context = createParserContext(text);
-    let currentChapter = {
-        title: 'بداية الكتاب',
-        id: ''
+    let currentState = {
+        book: {
+            title: '',
+            id: ''
+        },
+        section: null
     };
 
     for (let pageIndex = 0; pageIndex < context.pages.length; pageIndex++) {
@@ -207,7 +253,7 @@ export async function parseBookContentAsync(text, options = {}) {
         context.pageBlocks.push([]);
 
         for (const line of lines) {
-            currentChapter = parseLine(context, line, pageIndex, currentChapter);
+            currentState = parseLine(context, line, pageIndex, currentState);
             context.processedLines += 1;
 
             if (context.processedLines % chunkSize === 0) {
