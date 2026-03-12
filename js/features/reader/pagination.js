@@ -85,6 +85,14 @@ function createBlockNode(block) {
         return heading;
     }
 
+    if (block.type === 'anchor') {
+        const anchor = document.createElement('span');
+        anchor.id = block.id;
+        anchor.className = 'chapter-anchor';
+        anchor.setAttribute('aria-hidden', 'true');
+        return anchor;
+    }
+
     const paragraph = document.createElement('p');
     paragraph.textContent = block.text;
     return paragraph;

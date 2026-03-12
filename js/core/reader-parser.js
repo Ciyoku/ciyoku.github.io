@@ -11,7 +11,7 @@ export { normalizeArabicForSearch, splitBookPages };
 
 /**
  * @typedef {Object} PageBlock
- * @property {'heading'|'paragraph'} type
+ * @property {'heading'|'paragraph'|'anchor'} type
  * @property {string} text
  * @property {string} [id]
  * @property {'book'|'section'} [level]
@@ -147,46 +147,65 @@ function createParserContext(text) {
  * @param {{book: {title: string, id: string}, section: {title: string, id: string} | null}} currentState
  * @returns {{book: {title: string, id: string}, section: {title: string, id: string} | null}}
  */
+/**
+ * @param {string} trimmedLine
+ * @returns {{title: string, kind: 'book'|'section'}|null}
+ */
+function getHeadingInfo(trimmedLine) {
+    if (!trimmedLine.startsWith('#')) return null;
+
+    let hashEnd = 0;
+    while (trimmedLine[hashEnd] === '#') {
+        hashEnd += 1;
+    }
+
+    const hashCount = hashEnd;
+    const title = trimmedLine.slice(hashEnd).trim();
+
+    if (!title) return null;
+
+    return {
+        title,
+        kind: hashCount >= 2 ? 'section' : 'book'
+    };
+}
+
 function parseLine(context, line, pageIndex, currentState) {
     const trimmed = line.trim();
     if (!trimmed) return currentState;
 
-    if (trimmed.startsWith('##')) {
-        const title = trimmed.replace(/^##+/, '').trim();
-        if (!title) return currentState;
-        const id = `chap-${context.chapterIndex}`;
-        context.pageBlocks[pageIndex].push({
-            type: 'heading',
-            id,
-            text: title,
-            level: 'section'
-        });
-        context.chapters.push({
-            title,
-            id,
-            pageIndex,
-            kind: 'section',
-            bookId: currentState.book?.id || ''
-        });
-        context.chapterIndex += 1;
-        return {
-            book: currentState.book,
-            section: {
+    const headingInfo = getHeadingInfo(trimmed);
+    if (headingInfo) {
+        const { title, kind } = headingInfo;
+        if (kind === 'section') {
+            const id = `chap-${context.chapterIndex}`;
+            context.pageBlocks[pageIndex].push({
+                type: 'anchor',
+                id,
+                text: ''
+            });
+            context.chapters.push({
                 title,
-                id
-            }
-        };
-    }
+                id,
+                pageIndex,
+                kind: 'section',
+                bookId: currentState.book?.id || ''
+            });
+            context.chapterIndex += 1;
+            return {
+                book: currentState.book,
+                section: {
+                    title,
+                    id
+                }
+            };
+        }
 
-    if (trimmed.startsWith('#')) {
-        const title = trimmed.replace(/^#+/, '').trim();
-        if (!title) return currentState;
         const id = `book-${context.bookIndex}`;
         context.pageBlocks[pageIndex].push({
-            type: 'heading',
+            type: 'anchor',
             id,
-            text: title,
-            level: 'book'
+            text: ''
         });
         context.chapters.push({
             title,
