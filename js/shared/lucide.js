@@ -102,6 +102,22 @@ const arrowDownWideNarrow = [
     ['path', { d: 'M11 12h4' }]
 ];
 
+const sun = [
+    ['circle', { cx: '12', cy: '12', r: '4' }],
+    ['path', { d: 'M12 2v2' }],
+    ['path', { d: 'M12 20v2' }],
+    ['path', { d: 'm4.93 4.93 1.41 1.41' }],
+    ['path', { d: 'm17.66 17.66 1.41 1.41' }],
+    ['path', { d: 'M2 12h2' }],
+    ['path', { d: 'M20 12h2' }],
+    ['path', { d: 'm6.34 17.66-1.41 1.41' }],
+    ['path', { d: 'm19.07 4.93-1.41 1.41' }]
+];
+
+const moon = [
+    ['path', { d: 'M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9' }]
+];
+
 const BUILTIN_ICONS = Object.freeze({
     search,
     'chevron-right': chevronRight,
@@ -120,7 +136,9 @@ const BUILTIN_ICONS = Object.freeze({
     'book-heart': bookHeart,
     'heart-plus': heartPlus,
     'heart-minus': heartMinus,
-    'arrow-down-wide-narrow': arrowDownWideNarrow
+    'arrow-down-wide-narrow': arrowDownWideNarrow,
+    sun,
+    moon
 });
 
 function toKebabCase(name) {
@@ -242,7 +260,9 @@ export function renderLucideIcons(root = document) {
             bookHeart,
             heartPlus,
             heartMinus,
-            arrowDownWideNarrow
+            arrowDownWideNarrow,
+            sun,
+            moon
         },
         attrs: {
             width: '24',

@@ -1,4 +1,4 @@
-const SW_VERSION = '2026-03-10-1';
+const SW_VERSION = '2026-03-14-1';
 const APP_SHELL_CACHE = `app-shell-${SW_VERSION}`;
 const RUNTIME_CACHE = `runtime-${SW_VERSION}`;
 const BOOK_PART_CACHE = 'library-book-parts-v1';
@@ -59,6 +59,7 @@ const APP_SHELL_ASSETS = [
     '/js/shared/query-words.js',
     '/js/shared/seo.js',
     '/js/shared/site-shell.js',
+    '/js/shared/theme.js',
     '/js/shared/text-normalization.js',
     '/books/list.json',
     '/assets/fonts/kitab-base.woff2',

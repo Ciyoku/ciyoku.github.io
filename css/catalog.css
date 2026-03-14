@@ -188,7 +188,7 @@
     display: inline-block;
     font-size: var(--text-md);
     line-height: 1.75;
-    color: #f3f4f7;
+    color: var(--text-strong);
 }
 
 .book-link:hover {

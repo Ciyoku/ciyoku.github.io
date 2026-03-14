@@ -44,7 +44,7 @@
 
 .content-card p,
 .content-card li {
-    color: #dde0e7;
+    color: var(--text-color);
     font-size: var(--text-sm);
     line-height: 1.9;
 }
@@ -56,7 +56,7 @@
 }
 
 .simple-list li {
-    border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+    border-bottom: 1px dashed var(--border-subtle);
     padding-bottom: 0.45rem;
 }
 
@@ -182,7 +182,7 @@
 
 .category-section.is-active .category-row {
     color: var(--accent-color);
-    background: rgba(62, 166, 255, 0.12);
+    background: var(--accent-weak);
 }
 
 .category-section.is-active .category-label {
@@ -190,7 +190,7 @@
 }
 
 .category-section.is-active .category-side-count {
-    color: #8fcfff;
+    color: var(--accent-color);
 }
 
 @media (max-width: 640px) {

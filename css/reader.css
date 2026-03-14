@@ -155,13 +155,13 @@
     font-size: var(--text-sm);
     font-weight: 400;
     line-height: 1.8;
-    color: #b9bfc9;
+    color: var(--text-soft);
     cursor: pointer;
 }
 
 .chapter-book-toggle {
     font-weight: 600;
-    color: #d6dbe4;
+    color: var(--text-strong);
 }
 
 .chapter-book-toggle .toc-icon {
@@ -187,7 +187,7 @@
 }
 
 .chapter-sublist .chapter-section-link {
-    color: #aeb4bf;
+    color: var(--text-soft);
 }
 
 .chapter-book-toggle:hover,
@@ -195,7 +195,7 @@
 .chapter-link:hover,
 .chapter-link.is-active {
     background-color: var(--hover-color);
-    color: #fff;
+    color: var(--text-color);
 }
 
 .chapter-empty {
@@ -313,9 +313,9 @@
 .search-input {
     width: 100%;
     padding: 0.75rem;
-    background: #080a0e;
+    background: var(--surface-2);
     border: 1px solid var(--border-color);
-    color: #fff;
+    color: var(--text-color);
     border-radius: var(--radius-sm);
     font-family: var(--font-ui);
     font-size: var(--text-sm);
@@ -336,7 +336,7 @@
 }
 
 .search-result-item {
-    background: #090c11;
+    background: var(--surface-1);
     padding: 0.9rem;
     margin-bottom: 0.75rem;
     border-radius: var(--radius-sm);
@@ -371,8 +371,8 @@
 }
 
 .highlight {
-    background-color: rgba(214, 173, 71, 0.42);
-    color: #fff;
+    background-color: var(--highlight-bg);
+    color: var(--highlight-text);
     padding: 0 2px;
     border-radius: 2px;
 }

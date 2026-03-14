@@ -1,6 +1,7 @@
 import { renderLucideIcons } from './lucide.js';
 import { applyDefaultPageSeo } from './page-seo-defaults.js';
 import { registerPwaServiceWorker } from './pwa.js';
+import { applyStoredTheme, setupThemeToggle } from './theme.js';
 
 const MAIN_SECTIONS = Object.freeze([
     { href: 'index.html', label: 'كتب', icon: 'library-big' },
@@ -22,6 +23,8 @@ const NAV_EXCLUDED_PAGES = Object.freeze(new Set([
 ]));
 
 const SITE_LOGO_HTML = '<a href="index.html" class="site-logo"><span>المكتبة</span><span>الأخبارية</span></a>';
+
+applyStoredTheme();
 
 function getCurrentPageName() {
     const path = String(window.location.pathname || '');
@@ -107,6 +110,7 @@ function initSiteShell() {
 
     removeFooters();
     renderLucideIcons(document);
+    setupThemeToggle();
     syncHeaderHeight();
     window.addEventListener('resize', syncHeaderHeight, { passive: true });
     void registerPwaServiceWorker();
