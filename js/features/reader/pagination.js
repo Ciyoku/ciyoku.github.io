@@ -232,7 +232,8 @@ export function createPaginationController({
         pageContainer.replaceChildren(fragment);
     }
 
-    function scrollAfterRender(chapterId) {
+    function scrollAfterRender(chapterId, scrollMode) {
+        if (scrollMode === 'none') return;
         if (chapterId) {
             requestAnimationFrame(() => {
                 const element = document.getElementById(chapterId);
@@ -255,6 +256,7 @@ export function createPaginationController({
         const safeIndex = clamp(pageIndex, 0, totalPages - 1);
         const chapterId = typeof options.chapterId === 'string' ? options.chapterId : '';
         const historyMode = options.historyMode || 'replace';
+        const scrollMode = options.scrollMode === 'none' ? 'none' : 'auto';
 
         state.currentPageIndex = safeIndex;
         state.currentChapterId = chapterId;
@@ -263,7 +265,7 @@ export function createPaginationController({
         renderPageBlocks(blocks);
         updateNavState();
         updateActiveChapterHighlight();
-        scrollAfterRender(chapterId);
+        scrollAfterRender(chapterId, scrollMode);
 
         if (historyMode !== 'none') {
             updateReaderStateInUrl(state, { mode: historyMode });

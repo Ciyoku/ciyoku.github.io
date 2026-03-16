@@ -20,6 +20,12 @@ import { createReaderPartLoader } from './part-loader.js';
 import { updateReaderSeo as applyReaderSeoMetadata } from './reader-seo.js';
 import { bindReaderPopstateNavigation } from './popstate-navigation.js';
 import {
+    getScrollRatio,
+    getStoredReadingPosition,
+    restoreScrollRatio,
+    updateStoredReadingPosition
+} from './reading-position.js';
+import {
     downloadBookForOffline,
     getBookDownloadStatus,
     isOfflineBookStorageSupported
@@ -49,6 +55,72 @@ const state = createReaderState();
 let activeBookInfo = null;
 let loadBookPart = async () => {};
 let readerDownloadController = null;
+const READING_POSITION_SAVE_DELAY = 200;
+let scrollSaveTimer = null;
+let pendingRestorePosition = null;
+let readingPositionBound = false;
+
+function shouldRestoreStoredPosition(requestedState) {
+    if (!requestedState || typeof requestedState !== 'object') return true;
+    return !requestedState.hasExplicitPart
+        && !requestedState.hasExplicitPage
+        && !requestedState.hasExplicitChapter;
+}
+
+function saveReadingPosition({ includeScroll = false } = {}) {
+    if (!state.currentBookId || !state.pageBlocks.length) return;
+    const position = {
+        partIndex: state.currentPartIndex,
+        pageIndex: state.currentPageIndex,
+        chapterId: state.currentChapterId || ''
+    };
+    if (includeScroll) {
+        position.scrollRatio = getScrollRatio();
+    }
+    updateStoredReadingPosition(state.currentBookId, position);
+}
+
+function scheduleScrollSave() {
+    if (scrollSaveTimer) return;
+    scrollSaveTimer = window.setTimeout(() => {
+        scrollSaveTimer = null;
+        saveReadingPosition({ includeScroll: true });
+    }, READING_POSITION_SAVE_DELAY);
+}
+
+function flushReadingPosition() {
+    if (scrollSaveTimer) {
+        clearTimeout(scrollSaveTimer);
+        scrollSaveTimer = null;
+    }
+    saveReadingPosition({ includeScroll: true });
+}
+
+function handlePageRender() {
+    if (pendingRestorePosition) {
+        const restore = pendingRestorePosition;
+        pendingRestorePosition = null;
+        if (state.currentBookId === restore.bookId && state.currentPartIndex === restore.partIndex) {
+            restoreScrollRatio(restore.scrollRatio);
+            saveReadingPosition({ includeScroll: false });
+            return;
+        }
+    }
+    saveReadingPosition({ includeScroll: false });
+}
+
+function bindReadingPositionTracking() {
+    if (readingPositionBound) return;
+    readingPositionBound = true;
+
+    window.addEventListener('scroll', scheduleScrollSave, { passive: true });
+    window.addEventListener('pagehide', flushReadingPosition);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            flushReadingPosition();
+        }
+    });
+}
 
 /**
  * @param {HTMLButtonElement} button
@@ -195,6 +267,7 @@ const pagination = createPaginationController({
     state,
     toArabicIndicNumber,
     updateReaderStateInUrl,
+    onPageRender: handlePageRender,
     renderLucideIcons
 });
 
@@ -255,12 +328,14 @@ async function loadBook(bookId) {
     const normalizedId = String(bookId ?? '').trim();
     if (!normalizedId) {
         state.currentBookId = '';
+        pendingRestorePosition = null;
         readerDownloadController?.setBook(null);
         renderMissingBookMessage();
         return;
     }
 
     resetBookCachesForSwitch(normalizedId);
+    pendingRestorePosition = null;
 
     state.currentBookId = normalizedId;
     renderReaderLoading();
@@ -288,21 +363,40 @@ async function loadBook(bookId) {
         setDocumentTitle(info);
 
         const requestedState = getRequestedReaderState();
-        const initialState = {
-            partIndex: Number.isInteger(requestedState.partIndex) ? requestedState.partIndex : 0,
-            pageIndex: Number.isInteger(requestedState.pageIndex) ? requestedState.pageIndex : 0,
-            chapterId: String(requestedState.chapterId ?? '')
-        };
+        const storedPosition = shouldRestoreStoredPosition(requestedState)
+            ? getStoredReadingPosition(normalizedId)
+            : null;
+        pendingRestorePosition = storedPosition;
+
+        const initialState = storedPosition
+            ? {
+                partIndex: storedPosition.partIndex,
+                pageIndex: storedPosition.pageIndex,
+                chapterId: storedPosition.chapterId
+            }
+            : {
+                partIndex: Number.isInteger(requestedState.partIndex) ? requestedState.partIndex : 0,
+                pageIndex: Number.isInteger(requestedState.pageIndex) ? requestedState.pageIndex : 0,
+                chapterId: String(requestedState.chapterId ?? '')
+            };
         const safePartIndex = clampValue(initialState.partIndex, 0, Math.max(state.bookParts.length - 1, 0));
 
         state.currentPartIndex = safePartIndex;
+        if (pendingRestorePosition) {
+            pendingRestorePosition = {
+                ...pendingRestorePosition,
+                bookId: normalizedId,
+                partIndex: safePartIndex
+            };
+        }
         updateReaderSeo();
 
         renderBookPartSelector();
         await loadBookPart(safePartIndex, {
             pageIndex: initialState.pageIndex,
             chapterId: initialState.chapterId,
-            historyMode: 'replace'
+            historyMode: 'replace',
+            scrollMode: pendingRestorePosition ? 'none' : undefined
         });
     } catch (error) {
         renderReaderError(`${BOOK_LOAD_ERROR_PREFIX}: ${error.message || BOOK_TEXT_LOAD_ERROR}`);
@@ -329,6 +423,7 @@ function setupUI() {
 export async function initReaderPage() {
     readerDownloadController = createReaderDownloadController();
     setupUI();
+    bindReadingPositionTracking();
     bindReaderPopstateNavigation({
         state,
         getRequestedReaderState,

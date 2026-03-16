@@ -81,7 +81,8 @@ export function createReaderPartLoader({
         pagination.renderSidebar(parsed.chapters, options.onAfterChapterNavigate);
         pagination.renderPage(initialPageIndex, {
             chapterId: initialChapterId,
-            historyMode: options.historyMode || 'replace'
+            historyMode: options.historyMode || 'replace',
+            scrollMode: options.scrollMode
         });
     }
 

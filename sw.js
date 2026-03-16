@@ -1,4 +1,4 @@
-const SW_VERSION = '2026-03-14-1';
+const SW_VERSION = '2026-03-16-1';
 const APP_SHELL_CACHE = `app-shell-${SW_VERSION}`;
 const RUNTIME_CACHE = `runtime-${SW_VERSION}`;
 const BOOK_PART_CACHE = 'library-book-parts-v1';
@@ -41,6 +41,7 @@ const APP_SHELL_ASSETS = [
     '/js/features/reader/part-state.js',
     '/js/features/reader/popstate-navigation.js',
     '/js/features/reader/reader-app.js',
+    '/js/features/reader/reading-position.js',
     '/js/features/reader/reader-seo.js',
     '/js/features/reader/search-results.js',
     '/js/features/reader/search.js',
