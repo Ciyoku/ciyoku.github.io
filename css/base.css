@@ -562,6 +562,102 @@ a {
     text-align: center;
 }
 
+.pwa-install-widget {
+    position: fixed;
+    inset-inline: 0;
+    bottom: max(0.85rem, env(safe-area-inset-bottom));
+    z-index: 1200;
+    width: min(94vw, 560px);
+    margin-inline: auto;
+    animation: fadeIn 0.26s ease;
+}
+
+.pwa-install-widget[hidden] {
+    display: none !important;
+}
+
+.pwa-install-widget-content {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-elevated);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+    padding: 0.7rem 0.78rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.8rem;
+}
+
+.pwa-install-widget-text-group {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.pwa-install-widget-title {
+    color: var(--text-strong);
+    font-size: var(--text-sm);
+    line-height: 1.55;
+    font-weight: 700;
+}
+
+.pwa-install-widget-description {
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+    line-height: 1.6;
+}
+
+.pwa-install-widget-actions {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 0.45rem;
+}
+
+.pwa-install-widget-install,
+.pwa-install-widget-close {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-ui);
+    font-size: var(--text-xs);
+    line-height: 1;
+    min-height: 2rem;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.pwa-install-widget-install {
+    background: var(--accent-weak);
+    color: var(--accent-color);
+    border-color: rgba(62, 166, 255, 0.45);
+    padding: 0.38rem 0.8rem;
+}
+
+.pwa-install-widget-install:hover,
+.pwa-install-widget-install:focus-visible {
+    border-color: var(--accent-color);
+    background: rgba(62, 166, 255, 0.22);
+}
+
+.pwa-install-widget-install:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.pwa-install-widget-close {
+    background: transparent;
+    color: var(--text-muted);
+    padding: 0.38rem 0.62rem;
+}
+
+.pwa-install-widget-close:hover,
+.pwa-install-widget-close:focus-visible {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    background: var(--hover-color);
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -678,6 +774,22 @@ a {
 
     .container {
         padding: 1.4rem 0.8rem;
+    }
+
+    .pwa-install-widget {
+        width: min(96vw, 520px);
+        bottom: max(0.6rem, env(safe-area-inset-bottom));
+    }
+
+    .pwa-install-widget-content {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.55rem;
+        padding: 0.62rem 0.66rem;
+    }
+
+    .pwa-install-widget-actions {
+        justify-content: flex-start;
     }
 
     .fade-in {

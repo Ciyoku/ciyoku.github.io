@@ -1,6 +1,7 @@
 import { renderLucideIcons } from './lucide.js';
 import { applyDefaultPageSeo } from './page-seo-defaults.js';
 import { registerPwaServiceWorker } from './pwa.js';
+import { initPwaInstallWidget } from './pwa-install-widget.js';
 import { applyStoredTheme, setupThemeToggle } from './theme.js';
 
 const MAIN_SECTIONS = Object.freeze([
@@ -111,6 +112,7 @@ function initSiteShell() {
     removeFooters();
     renderLucideIcons(document);
     setupThemeToggle();
+    initPwaInstallWidget();
     syncHeaderHeight();
     window.addEventListener('resize', syncHeaderHeight, { passive: true });
     void registerPwaServiceWorker();

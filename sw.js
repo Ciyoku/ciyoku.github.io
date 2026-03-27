@@ -1,4 +1,4 @@
-const SW_VERSION = '2026-03-16-1';
+const SW_VERSION = '2026-03-27-1';
 const APP_SHELL_CACHE = `app-shell-${SW_VERSION}`;
 const RUNTIME_CACHE = `runtime-${SW_VERSION}`;
 const BOOK_PART_CACHE = 'library-book-parts-v1';
@@ -57,6 +57,7 @@ const APP_SHELL_ASSETS = [
     '/js/shared/number-format.js',
     '/js/shared/page-seo-defaults.js',
     '/js/shared/pwa.js',
+    '/js/shared/pwa-install-widget.js',
     '/js/shared/query-words.js',
     '/js/shared/seo.js',
     '/js/shared/site-shell.js',
