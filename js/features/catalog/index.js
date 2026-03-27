@@ -12,6 +12,42 @@ const EMPTY_CATALOG_MESSAGE = 'لا توجد كتب متاحة حاليًا.';
 
 onDomReady(initCatalogPage);
 
+function resolveCatalogActionIntent() {
+    const params = new URLSearchParams(window.location.search);
+    const action = String(params.get('action') ?? '').trim().toLowerCase();
+    if (!action) {
+        return '';
+    }
+
+    params.delete('action');
+    const nextSearch = params.toString();
+    const nextUrl = nextSearch ? `index.html?${nextSearch}` : 'index.html';
+    const currentUrl = `${window.location.pathname}${window.location.search}`;
+    if (currentUrl !== nextUrl) {
+        history.replaceState(null, '', nextUrl);
+    }
+
+    return action;
+}
+
+function focusCatalogSearchInput(searchInput) {
+    if (!(searchInput instanceof HTMLInputElement)) return;
+
+    const tryFocus = () => {
+        try {
+            searchInput.focus({ preventScroll: true });
+        } catch (_) {
+            searchInput.focus();
+        }
+        searchInput.select();
+    };
+
+    window.requestAnimationFrame(() => {
+        tryFocus();
+        window.setTimeout(tryFocus, 120);
+    });
+}
+
 async function initCatalogPage() {
     const container = document.getElementById('bookList');
     const searchInput = document.getElementById('catalogSearchInput');
@@ -20,6 +56,7 @@ async function initCatalogPage() {
 
     let books = [];
     let query = '';
+    const pageAction = resolveCatalogActionIntent();
     const listController = createBookListPageController({
         container,
         emptyMessage: EMPTY_MESSAGE,
@@ -62,6 +99,10 @@ async function initCatalogPage() {
         query = event.target.value;
         refresh();
     });
+
+    if (pageAction === 'search') {
+        focusCatalogSearchInput(searchInput);
+    }
 
     try {
         books = await fetchBooksList();

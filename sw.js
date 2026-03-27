@@ -1,4 +1,4 @@
-const SW_VERSION = '2026-03-27-1';
+const SW_VERSION = '2026-03-27-2';
 const APP_SHELL_CACHE = `app-shell-${SW_VERSION}`;
 const RUNTIME_CACHE = `runtime-${SW_VERSION}`;
 const BOOK_PART_CACHE = 'library-book-parts-v1';

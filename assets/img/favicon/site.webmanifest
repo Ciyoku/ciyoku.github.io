@@ -35,8 +35,36 @@
   ],
   "shortcuts": [
     {
-      "name": "Books",
-      "url": "/index.html",
+      "name": "متابعة القراءة",
+      "short_name": "متابعة",
+      "description": "الانتقال مباشرةً إلى آخر موضع قراءة محفوظ.",
+      "url": "/reader.html?action=resume",
+      "icons": [
+        {
+          "src": "/assets/img/favicon/android-chrome-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "بحث",
+      "short_name": "بحث",
+      "description": "فتح البحث في الفهرس مباشرةً.",
+      "url": "/index.html?action=search",
+      "icons": [
+        {
+          "src": "/assets/img/favicon/android-chrome-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "الأقسام",
+      "short_name": "الأقسام",
+      "description": "تصفح الكتب حسب التصنيفات.",
+      "url": "/categories.html",
       "icons": [
         {
           "src": "/assets/img/favicon/android-chrome-192x192.png",

@@ -17,6 +17,14 @@ function normalizeIndex(value, fallback = 0) {
     return parsed;
 }
 
+function normalizeTimestamp(value) {
+    const parsed = Number.parseInt(String(value ?? ''), 10);
+    if (!Number.isInteger(parsed) || parsed <= 0) {
+        return 0;
+    }
+    return parsed;
+}
+
 function loadStoredPositions() {
     if (cachedPositions) return cachedPositions;
     try {
@@ -73,6 +81,50 @@ export function getStoredReadingPosition(bookId) {
         pageIndex,
         chapterId,
         scrollRatio
+    };
+}
+
+export function getMostRecentStoredReadingPosition() {
+    const positions = loadStoredPositions();
+    const entries = Object.entries(positions);
+    if (!entries.length) return null;
+
+    let latest = null;
+
+    entries.forEach(([bookId, rawEntry]) => {
+        if (!rawEntry || typeof rawEntry !== 'object') return;
+
+        const key = normalizeBookId(bookId);
+        if (!key) return;
+
+        const updatedAt = normalizeTimestamp(rawEntry.updatedAt);
+        if (latest && updatedAt < latest.updatedAt) return;
+
+        const partIndex = normalizeIndex(rawEntry.partIndex, 0);
+        const pageIndex = normalizeIndex(rawEntry.pageIndex, 0);
+        const chapterId = typeof rawEntry.chapterId === 'string' ? rawEntry.chapterId : '';
+        const scrollRatio = Number.isFinite(rawEntry.scrollRatio)
+            ? clampValue(rawEntry.scrollRatio, 0, 1)
+            : 0;
+
+        latest = {
+            bookId: key,
+            partIndex,
+            pageIndex,
+            chapterId,
+            scrollRatio,
+            updatedAt
+        };
+    });
+
+    if (!latest) return null;
+
+    return {
+        bookId: latest.bookId,
+        partIndex: latest.partIndex,
+        pageIndex: latest.pageIndex,
+        chapterId: latest.chapterId,
+        scrollRatio: latest.scrollRatio
     };
 }
 

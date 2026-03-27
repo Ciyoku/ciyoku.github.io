@@ -21,6 +21,7 @@ import { updateReaderSeo as applyReaderSeoMetadata } from './reader-seo.js';
 import { bindReaderPopstateNavigation } from './popstate-navigation.js';
 import {
     getScrollRatio,
+    getMostRecentStoredReadingPosition,
     getStoredReadingPosition,
     restoreScrollRatio,
     updateStoredReadingPosition
@@ -420,6 +421,26 @@ function setupUI() {
     });
 }
 
+function redirectToReaderBook(bookId) {
+    const normalizedBookId = String(bookId ?? '').trim();
+    if (!normalizedBookId) return false;
+
+    const params = new URLSearchParams();
+    params.set('book', normalizedBookId);
+    window.location.replace(`reader.html?${params.toString()}`);
+    return true;
+}
+
+function handleResumeActionIntent() {
+    const latestPosition = getMostRecentStoredReadingPosition();
+    if (!latestPosition || !latestPosition.bookId) {
+        window.location.replace('index.html');
+        return true;
+    }
+
+    return redirectToReaderBook(latestPosition.bookId);
+}
+
 export async function initReaderPage() {
     readerDownloadController = createReaderDownloadController();
     setupUI();
@@ -433,6 +454,12 @@ export async function initReaderPage() {
     });
 
     const urlParams = new URLSearchParams(window.location.search);
+    const action = String(urlParams.get('action') ?? '').trim().toLowerCase();
+    if (action === 'resume') {
+        handleResumeActionIntent();
+        return;
+    }
+
     const bookId = urlParams.get('book');
     if (!bookId) {
         state.currentBookId = '';
