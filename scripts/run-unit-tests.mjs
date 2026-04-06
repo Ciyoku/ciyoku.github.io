@@ -12,6 +12,7 @@ import {
     buildReaderUrlForState,
     parseReaderStateFromSearchParams
 } from '../js/features/reader/url-state.js';
+import { buildPartNavigationModel } from '../js/features/reader/pagination.js';
 import { normalizeArabicForSearch } from '../js/shared/arabic-search.js';
 
 const testCases = [];
@@ -108,6 +109,39 @@ test('reader-url-state: URL construction for reader state', () => {
     }, 'https://ciyoku.github.io/reader.html');
 
     assert.equal(`${singlePart.pathname}?${singlePart.searchParams.toString()}`, '/reader.html?book=book-y&page=1');
+});
+
+test('reader-part-navigation: hides control for single-part books', () => {
+    const model = buildPartNavigationModel([
+        { label: 'Volume 1', status: 'ready' }
+    ], 0);
+
+    assert.equal(model.visible, false);
+    assert.equal(model.selectedIndex, 0);
+    assert.deepEqual(model.options, []);
+});
+
+test('reader-part-navigation: maps loading/missing states and selection', () => {
+    const model = buildPartNavigationModel([
+        { label: 'Volume 1', status: 'ready' },
+        { label: 'Volume 2', status: 'loading' },
+        { label: 'Volume 3', status: 'missing' }
+    ], 8);
+
+    assert.equal(model.visible, true);
+    assert.equal(model.selectedIndex, 2);
+    assert.equal(model.options.length, 3);
+
+    assert.equal(model.options[0].disabled, false);
+    assert.equal(model.options[0].label, 'Volume 1');
+
+    assert.equal(model.options[1].disabled, false);
+    assert.equal(model.options[1].label.startsWith('Volume 2'), true);
+    assert.notEqual(model.options[1].label, 'Volume 2');
+
+    assert.equal(model.options[2].disabled, true);
+    assert.equal(model.options[2].label.startsWith('Volume 3'), true);
+    assert.notEqual(model.options[2].label, 'Volume 3');
 });
 
 test('reader-search: minimum words and normalized matching', () => {

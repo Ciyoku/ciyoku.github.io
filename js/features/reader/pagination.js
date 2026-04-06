@@ -1,5 +1,68 @@
-﻿function clamp(value, min, max) {
+function clamp(value, min, max) {
     return Math.min(Math.max(value, min), max);
+}
+
+const PART_NAV_LABEL = 'الأجزاء';
+const PART_LOADING_SUFFIX = ' (جارٍ التحميل...)';
+const PART_MISSING_SUFFIX = ' (غير متوفر)';
+
+function getPartBaseLabel(part, index) {
+    const label = typeof part?.label === 'string' ? part.label.trim() : '';
+    if (label) return label;
+    return `الجزء ${index + 1}`;
+}
+
+export function buildPartNavigationModel(bookParts, currentPartIndex) {
+    const parts = Array.isArray(bookParts) ? bookParts : [];
+    if (parts.length <= 1) {
+        return {
+            visible: false,
+            selectedIndex: 0,
+            options: []
+        };
+    }
+
+    const selectedIndex = clamp(
+        Number.isInteger(currentPartIndex) ? currentPartIndex : 0,
+        0,
+        Math.max(parts.length - 1, 0)
+    );
+
+    const options = parts.map((part, index) => {
+        const status = typeof part?.status === 'string' ? part.status : 'idle';
+        const baseLabel = getPartBaseLabel(part, index);
+
+        if (status === 'missing') {
+            return {
+                index,
+                label: `${baseLabel}${PART_MISSING_SUFFIX}`,
+                disabled: true,
+                status
+            };
+        }
+
+        if (status === 'loading') {
+            return {
+                index,
+                label: `${baseLabel}${PART_LOADING_SUFFIX}`,
+                disabled: false,
+                status
+            };
+        }
+
+        return {
+            index,
+            label: baseLabel,
+            disabled: false,
+            status
+        };
+    });
+
+    return {
+        visible: true,
+        selectedIndex,
+        options
+    };
 }
 
 function createNavIconButton({ className, iconName, label }) {
@@ -17,7 +80,41 @@ function createNavIconButton({ className, iconName, label }) {
     return button;
 }
 
-function buildPageNav({ onNavigate, renderLucideIcons }) {
+function createPartNavigationControl({ onSelectPart }) {
+    const container = document.createElement('div');
+    container.className = 'page-nav-part-control';
+    container.hidden = true;
+
+    const field = document.createElement('label');
+    field.className = 'page-nav-part-field';
+
+    const label = document.createElement('span');
+    label.className = 'page-nav-part-label';
+    label.textContent = PART_NAV_LABEL;
+
+    const select = document.createElement('select');
+    select.className = 'page-nav-part-select';
+    select.setAttribute('aria-label', 'اختيار الجزء');
+
+    field.appendChild(label);
+    field.appendChild(select);
+    container.appendChild(field);
+
+    select.addEventListener('change', () => {
+        const nextPartIndex = Number.parseInt(select.value, 10);
+        if (!Number.isInteger(nextPartIndex)) return;
+        if (typeof onSelectPart === 'function') {
+            onSelectPart(nextPartIndex);
+        }
+    });
+
+    return {
+        container,
+        select
+    };
+}
+
+function buildPageNav({ onNavigate, renderLucideIcons, partNavigation = null }) {
     const root = document.createElement('div');
     root.className = 'page-nav';
 
@@ -59,6 +156,10 @@ function buildPageNav({ onNavigate, renderLucideIcons }) {
     root.appendChild(nextButton);
     root.appendChild(lastButton);
 
+    if (partNavigation?.container) {
+        root.appendChild(partNavigation.container);
+    }
+
     renderLucideIcons(root);
     firstButton.addEventListener('click', () => onNavigate('first'));
     prevButton.addEventListener('click', () => onNavigate('prev'));
@@ -71,7 +172,8 @@ function buildPageNav({ onNavigate, renderLucideIcons }) {
         prevButton,
         nextButton,
         pageNumberDisplay,
-        lastButton
+        lastButton,
+        partNavigation
     };
 }
 
@@ -103,13 +205,15 @@ export function createPaginationController({
     toArabicIndicNumber,
     updateReaderStateInUrl,
     onPageRender,
-    renderLucideIcons
+    renderLucideIcons,
+    onSelectPart
 }) {
     const chapterList = document.getElementById('chapterList');
     const readerContent = document.getElementById('readerContent');
     const navs = [];
     let pageContainer = null;
     let layoutReady = false;
+    let topPartNavigation = null;
     const collapsedBooks = new Set();
     let lastBookId = '';
 
@@ -125,6 +229,7 @@ export function createPaginationController({
         navs.length = 0;
         pageContainer = null;
         layoutReady = false;
+        topPartNavigation = null;
     }
 
     function getNearestChapterIdForPage(pageIndex) {
@@ -177,6 +282,37 @@ export function createPaginationController({
         });
     }
 
+    function syncPartNavigation() {
+        if (!topPartNavigation) return;
+
+        const model = buildPartNavigationModel(state.bookParts, state.currentPartIndex);
+        const navRoot = topPartNavigation.container.closest('.page-nav');
+        if (navRoot) {
+            navRoot.classList.toggle('has-part-control', model.visible);
+        }
+        topPartNavigation.container.hidden = !model.visible;
+        topPartNavigation.select.replaceChildren();
+
+        if (!model.visible) {
+            topPartNavigation.select.disabled = true;
+            return;
+        }
+
+        const fragment = document.createDocumentFragment();
+        model.options.forEach((entry) => {
+            const option = document.createElement('option');
+            option.value = String(entry.index);
+            option.textContent = entry.label;
+            option.disabled = entry.disabled;
+            option.selected = entry.index === model.selectedIndex;
+            fragment.appendChild(option);
+        });
+
+        topPartNavigation.select.appendChild(fragment);
+        topPartNavigation.select.value = String(model.selectedIndex);
+        topPartNavigation.select.disabled = model.options.every((entry) => entry.disabled);
+    }
+
     function ensureLayout() {
         if (isLayoutMounted()) return;
         if (layoutReady) {
@@ -205,9 +341,31 @@ export function createPaginationController({
             }
         };
 
+        topPartNavigation = createPartNavigationControl({
+            onSelectPart: (partIndex) => {
+                const safePartIndex = clamp(
+                    partIndex,
+                    0,
+                    Math.max(state.bookParts.length - 1, 0)
+                );
+                if (!Number.isInteger(safePartIndex)) return;
+
+                state.currentPartIndex = safePartIndex;
+                syncPartNavigation();
+
+                if (typeof onSelectPart === 'function') {
+                    const request = onSelectPart(safePartIndex);
+                    if (request && typeof request.catch === 'function') {
+                        request.catch(() => {});
+                    }
+                }
+            }
+        });
+
         const topNav = buildPageNav({
             onNavigate: handleNavAction,
-            renderLucideIcons
+            renderLucideIcons,
+            partNavigation: topPartNavigation
         });
 
         const bottomNav = buildPageNav({
@@ -222,6 +380,7 @@ export function createPaginationController({
         pageContainer = contentBody;
         readerContent.replaceChildren(topNav.root, contentBody, bottomNav.root);
         layoutReady = true;
+        syncPartNavigation();
     }
 
     function renderPageBlocks(blocks) {
@@ -487,7 +646,8 @@ export function createPaginationController({
     return {
         renderSidebar,
         renderPage,
-        goToPage
+        goToPage,
+        syncPartNavigation
     };
 }
 

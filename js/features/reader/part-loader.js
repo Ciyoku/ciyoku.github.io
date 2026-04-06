@@ -10,7 +10,7 @@ export function createReaderPartLoader({
     parseBookContentAsync,
     getParsedPartCache,
     setParsedPartCache,
-    updatePartSelector,
+    syncPartNavigation,
     pagination,
     updateReaderSeo,
     renderReaderLoading,
@@ -109,7 +109,9 @@ export function createReaderPartLoader({
         const historyMode = options.historyMode || 'replace';
 
         state.currentPartIndex = safePartIndex;
-        updatePartSelector(state);
+        if (typeof syncPartNavigation === 'function') {
+            syncPartNavigation();
+        }
         updateReaderSeo();
 
         const selectedPart = state.bookParts[safePartIndex];

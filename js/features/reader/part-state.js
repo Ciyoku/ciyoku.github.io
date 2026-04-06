@@ -1,4 +1,6 @@
-import { getPartLabel } from './part-selector.js';
+export function getPartLabel(index, toArabicIndicNumber) {
+    return `الجزء ${toArabicIndicNumber(index + 1)}`;
+}
 
 export function buildBookPartState(partCount, toArabicIndicNumber) {
     const total = Number.isInteger(partCount) && partCount > 1 ? partCount : 1;

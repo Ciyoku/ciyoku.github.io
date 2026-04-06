@@ -8,7 +8,6 @@ import { createIosLoader } from '../../shared/loading-indicator.js';
 import { getRequestedReaderState, updateReaderStateInUrl } from './url-state.js';
 import { createSearchEngine, searchInBookIndex } from './search.js';
 import { createReaderState } from './constants.js';
-import { renderPartSelector, updatePartSelector } from './part-selector.js';
 import { createPaginationController } from './pagination.js';
 import { renderSearchResults } from './search-results.js';
 import { closeSidebarOnCompactView, setupReaderUi } from './ui-shell.js';
@@ -269,7 +268,11 @@ const pagination = createPaginationController({
     toArabicIndicNumber,
     updateReaderStateInUrl,
     onPageRender: handlePageRender,
-    renderLucideIcons
+    renderLucideIcons,
+    onSelectPart: (partIndex) => {
+        closeSidebarOnCompactView();
+        return loadBookPart(partIndex, { historyMode: 'push' });
+    }
 });
 
 function updateReaderSeo() {
@@ -277,16 +280,6 @@ function updateReaderSeo() {
         siteName: SITE_NAME,
         unknownBookTitle: UNKNOWN_BOOK_TITLE,
         readerTitleSuffix: READER_TITLE_SUFFIX
-    });
-}
-
-function renderBookPartSelector() {
-    renderPartSelector({
-        state,
-        onSelectPart: async (partIndex) => {
-            await loadBookPart(partIndex, { historyMode: 'push' });
-        },
-        onAfterSelectPart: closeSidebarOnCompactView
     });
 }
 
@@ -298,13 +291,15 @@ const partLoader = createReaderPartLoader({
     parseBookContentAsync,
     getParsedPartCache,
     setParsedPartCache,
-    updatePartSelector,
+    syncPartNavigation: () => {
+        pagination.syncPartNavigation();
+    },
     pagination,
     updateReaderSeo,
     renderReaderLoading,
     renderReaderError,
     onPartStatusChange: () => {
-        renderBookPartSelector();
+        pagination.syncPartNavigation();
     },
     canPreloadNextPart,
     partLoadErrorPrefix: PART_LOAD_ERROR_PREFIX
@@ -391,8 +386,7 @@ async function loadBook(bookId) {
             };
         }
         updateReaderSeo();
-
-        renderBookPartSelector();
+        pagination.syncPartNavigation();
         await loadBookPart(safePartIndex, {
             pageIndex: initialState.pageIndex,
             chapterId: initialState.chapterId,
