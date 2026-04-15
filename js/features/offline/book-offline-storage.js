@@ -603,18 +603,6 @@ export async function getBookDownloadStatus(bookId, partCount = 1) {
 }
 
 /**
- * @param {string|number} bookId
- */
-export async function removeDownloadedBook(bookId) {
-    const normalizedBookId = normalizeBookId(bookId);
-    if (!normalizedBookId) return;
-
-    const metadata = getBookMetadata(normalizedBookId);
-    const partCount = normalizePartCount(metadata?.partCount ?? 1);
-    await removeBookEntries(normalizedBookId, partCount);
-}
-
-/**
  * @param {string} bookId
  */
 async function maybeRefreshDownloadedBookInBackground(bookId) {

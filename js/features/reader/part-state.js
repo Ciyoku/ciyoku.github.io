@@ -1,4 +1,4 @@
-export function getPartLabel(index, toArabicIndicNumber) {
+function getPartLabel(index, toArabicIndicNumber) {
     return `الجزء ${toArabicIndicNumber(index + 1)}`;
 }
 

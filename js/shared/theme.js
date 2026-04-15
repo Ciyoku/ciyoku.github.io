@@ -36,7 +36,7 @@ function applyMetaThemeColor(theme) {
     meta.setAttribute('content', color);
 }
 
-export function applyTheme(theme, { persist = false } = {}) {
+function applyTheme(theme, { persist = false } = {}) {
     const resolved = resolveTheme(theme);
     document.documentElement.setAttribute('data-theme', resolved);
     applyMetaThemeColor(resolved);

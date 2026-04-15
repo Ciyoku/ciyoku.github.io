@@ -10,7 +10,7 @@ export function getBookTitleDisplay() {
     return document.getElementById('bookTitleDisplay');
 }
 
-export function getReaderContent() {
+function getReaderContent() {
     return document.getElementById('readerContent');
 }
 

@@ -31,7 +31,6 @@ const APP_SHELL_ASSETS = [
     '/js/features/categories/categories-data.js',
     '/js/features/categories/categories-page.js',
     '/js/features/categories/category-page.js',
-    '/js/features/offline/book-download-button.js',
     '/js/features/offline/book-offline-storage.js',
     '/js/features/reader/constants.js',
     '/js/features/reader/pagination.js',

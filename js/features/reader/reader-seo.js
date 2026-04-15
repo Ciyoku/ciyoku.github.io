@@ -1,7 +1,7 @@
 import { toPartParam } from '../../core/books-meta.js';
 import { setSocialMetadata } from '../../shared/seo.js';
 
-export function getReaderCanonicalPath(state) {
+function getReaderCanonicalPath(state) {
     if (!state.currentBookId) return 'reader.html';
 
     const params = new URLSearchParams();
