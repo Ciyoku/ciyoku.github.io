@@ -1,5 +1,5 @@
 import { fetchBooksList } from '../../core/books-repo.js';
-import { getBookId, getBookPartCount, getBookTitle } from '../../core/books-meta.js';
+import { getBookPartCount } from '../../core/books-meta.js';
 import { clearBookPartCache, fetchBookPart } from '../../core/book-content.js';
 import { createHighlightedTextFragment, parseBookContentAsync } from '../../core/reader-parser.js';
 import { toArabicIndicNumber } from '../../shared/number-format.js';
@@ -18,6 +18,7 @@ import { buildBookPartState, canPreloadNextPart } from './part-state.js';
 import { createReaderPartLoader } from './part-loader.js';
 import { updateReaderSeo as applyReaderSeoMetadata } from './reader-seo.js';
 import { bindReaderPopstateNavigation } from './popstate-navigation.js';
+import { createReaderDownloadController } from './download-controller.js';
 import {
     getScrollRatio,
     getMostRecentStoredReadingPosition,
@@ -25,11 +26,6 @@ import {
     restoreScrollRatio,
     updateStoredReadingPosition
 } from './reading-position.js';
-import {
-    downloadBookForOffline,
-    getBookDownloadStatus,
-    isOfflineBookStorageSupported
-} from '../offline/book-offline-storage.js';
 import {
     UNKNOWN_BOOK_TITLE,
     READER_TITLE_SUFFIX,
@@ -43,9 +39,6 @@ import {
 const BOOK_TEXT_LOAD_ERROR = 'تعذر تحميل نص الكتاب';
 const BOOK_LOAD_ERROR_PREFIX = 'تعذر تحميل الكتاب';
 const PART_LOAD_ERROR_PREFIX = 'تعذر تحميل هذا الجزء';
-const DOWNLOAD_BOOK_ARIA_LABEL = 'تنزيل الكتاب للاستخدام دون اتصال';
-const DOWNLOADED_BOOK_ARIA_LABEL = 'الكتاب محفوظ للاستخدام دون اتصال';
-const DOWNLOADING_BOOK_ARIA_LABEL = 'جارٍ تنزيل الكتاب للاستخدام دون اتصال';
 
 function clampValue(value, min, max) {
     return Math.min(Math.max(value, min), max);
@@ -120,147 +113,6 @@ function bindReadingPositionTracking() {
             flushReadingPosition();
         }
     });
-}
-
-/**
- * @param {HTMLButtonElement} button
- * @param {'book-down'|'book-check'} iconName
- */
-function setReaderDownloadButtonIcon(button, iconName) {
-    const existingIcon = button.querySelector(`.lucide-${iconName}`);
-    if (existingIcon) return;
-
-    const iconHost = document.createElement('span');
-    iconHost.className = 'reader-download-icon';
-    iconHost.setAttribute('data-lucide', iconName);
-    iconHost.setAttribute('aria-hidden', 'true');
-    button.replaceChildren(iconHost);
-    renderLucideIcons(button);
-}
-
-function createReaderDownloadController() {
-    const button = document.getElementById('readerDownloadBtn');
-    if (!(button instanceof HTMLButtonElement)) {
-        return {
-            setBook: () => {}
-        };
-    }
-
-    if (!isOfflineBookStorageSupported()) {
-        button.hidden = true;
-        button.setAttribute('aria-hidden', 'true');
-        return {
-            setBook: () => {}
-        };
-    }
-
-    let currentBook = null;
-    let activeSyncToken = 0;
-    let activeLocalDownloadBookId = '';
-
-    /**
-     * @param {Object} [options={}]
-     * @param {boolean} [options.downloaded=false]
-     * @param {boolean} [options.downloading=false]
-     * @param {boolean} [options.disabled=false]
-     */
-    function setButtonVisualState(options = {}) {
-        const downloaded = options.downloaded === true;
-        const downloading = options.downloading === true;
-        const disabled = options.disabled === true;
-
-        if (downloading) {
-            button.replaceChildren(createIosLoader({ size: 'sm', accent: true }));
-        } else {
-            const iconName = downloaded ? 'book-check' : 'book-down';
-            setReaderDownloadButtonIcon(button, iconName);
-        }
-
-        button.classList.toggle('is-downloaded', downloaded);
-        button.classList.toggle('is-downloading', downloading);
-        button.disabled = downloading || disabled;
-
-        const label = downloaded
-            ? DOWNLOADED_BOOK_ARIA_LABEL
-            : downloading
-                ? DOWNLOADING_BOOK_ARIA_LABEL
-                : DOWNLOAD_BOOK_ARIA_LABEL;
-
-        button.setAttribute('aria-label', label);
-        button.title = label;
-    }
-
-    async function syncButtonState(book, syncToken) {
-        const bookId = getBookId(book);
-        if (!bookId) {
-            setButtonVisualState({ downloaded: false, downloading: false, disabled: true });
-            return;
-        }
-
-        const partCount = getBookPartCount(book);
-        const status = await getBookDownloadStatus(bookId, partCount);
-        if (syncToken !== activeSyncToken) return;
-
-        setButtonVisualState({
-            downloaded: status.downloaded === true,
-            downloading: status.downloading === true || activeLocalDownloadBookId === bookId
-        });
-    }
-
-    button.addEventListener('click', async (event) => {
-        event.preventDefault();
-        if (!currentBook) return;
-
-        const bookId = getBookId(currentBook);
-        if (!bookId || activeLocalDownloadBookId === bookId) return;
-
-        const partCount = getBookPartCount(currentBook);
-        const status = await getBookDownloadStatus(bookId, partCount);
-        if (status.downloaded) {
-            await syncButtonState(currentBook, activeSyncToken);
-            return;
-        }
-
-        activeLocalDownloadBookId = bookId;
-        setButtonVisualState({ downloaded: false, downloading: true });
-
-        try {
-            await downloadBookForOffline({
-                id: bookId,
-                title: getBookTitle(currentBook),
-                parts: partCount
-            }, {
-                onProgress: () => {
-                    // Keep the loader visible during active download.
-                    if (!button.isConnected) return;
-                    setButtonVisualState({ downloaded: false, downloading: true });
-                }
-            });
-        } catch (error) {
-            if (typeof console !== 'undefined' && typeof console.error === 'function') {
-                console.error('Offline book download failed:', error);
-            }
-        } finally {
-            if (activeLocalDownloadBookId === bookId) {
-                activeLocalDownloadBookId = '';
-            }
-            await syncButtonState(currentBook, activeSyncToken);
-        }
-    });
-
-    setButtonVisualState({ downloaded: false, downloading: false, disabled: true });
-
-    return {
-        setBook(book) {
-            currentBook = book && typeof book === 'object' ? book : null;
-            activeSyncToken += 1;
-            if (!currentBook) {
-                setButtonVisualState({ downloaded: false, downloading: false, disabled: true });
-                return;
-            }
-            void syncButtonState(currentBook, activeSyncToken);
-        }
-    };
 }
 
 const pagination = createPaginationController({
@@ -436,7 +288,10 @@ function handleResumeActionIntent() {
 }
 
 export async function initReaderPage() {
-    readerDownloadController = createReaderDownloadController();
+    readerDownloadController = createReaderDownloadController({
+        renderLucideIcons,
+        createIosLoader
+    });
     setupUI();
     bindReadingPositionTracking();
     bindReaderPopstateNavigation({

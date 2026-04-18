@@ -1,8 +1,11 @@
 import { fetchBooksList } from '../../core/books-repo.js';
-import { buildCategoryPageUrl, groupBooksByCategory } from './categories-data.js';
-import { toArabicIndicNumber } from '../../shared/number-format.js';
 import { onDomReady } from '../../shared/bootstrap.js';
-import { createIosLoader } from '../../shared/loading-indicator.js';
+import { toArabicIndicNumber } from '../../shared/number-format.js';
+import { renderEntityListPage } from '../entities/entity-list-page.js';
+import { buildCategoryPageUrl, groupBooksByCategory } from './categories-data.js';
+
+const EMPTY_CATEGORIES_MESSAGE = 'لا توجد تصنيفات متاحة حاليًا.';
+const LOAD_CATEGORIES_ERROR_PREFIX = 'تعذر تحميل التصنيفات';
 
 onDomReady(initCategoriesPage);
 
@@ -27,10 +30,14 @@ function createCategorySection(index, category) {
     return section;
 }
 
-function renderLoadingSummary(summary) {
-    summary.hidden = false;
-    summary.className = 'status-ok status-loading';
-    summary.replaceChildren(createIosLoader({ size: 'sm' }));
+async function loadCategories() {
+    const books = await fetchBooksList();
+    return groupBooksByCategory(books);
+}
+
+function formatCategoriesSummary(count) {
+    const countLabel = toArabicIndicNumber(count);
+    return `عدد التصنيفات المتاحة: ${countLabel}`;
 }
 
 async function initCategoriesPage() {
@@ -38,32 +45,13 @@ async function initCategoriesPage() {
     const summary = document.getElementById('categoriesSummary');
     if (!root || !summary) return;
 
-    try {
-        renderLoadingSummary(summary);
-
-        const books = await fetchBooksList();
-        const categories = groupBooksByCategory(books);
-
-        if (!categories.length) {
-            root.replaceChildren();
-            summary.className = 'status-ok';
-            summary.textContent = 'لا توجد تصنيفات متاحة حاليًا.';
-            return;
-        }
-
-        const fragment = document.createDocumentFragment();
-        categories.forEach((category, index) => {
-            fragment.appendChild(createCategorySection(index + 1, category));
-        });
-        root.replaceChildren(fragment);
-
-        const countLabel = toArabicIndicNumber(categories.length);
-        summary.className = 'status-ok';
-        summary.textContent = `عدد التصنيفات المتاحة: ${countLabel}`;
-    } catch (error) {
-        root.replaceChildren();
-        summary.hidden = false;
-        summary.className = 'status-error';
-        summary.textContent = `تعذر تحميل التصنيفات: ${error.message}`;
-    }
+    await renderEntityListPage({
+        rootElement: root,
+        summaryElement: summary,
+        loadEntities: loadCategories,
+        createEntityNode: (category, index) => createCategorySection(index, category),
+        formatCountSummary: formatCategoriesSummary,
+        emptySummaryMessage: EMPTY_CATEGORIES_MESSAGE,
+        loadErrorPrefix: LOAD_CATEGORIES_ERROR_PREFIX
+    });
 }

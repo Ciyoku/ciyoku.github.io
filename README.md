@@ -4,8 +4,10 @@ Static Islamic Shia digital library with:
 - catalog browsing
 - category and author navigation
 - in-browser reader with chapters, parts, and page navigation
+- offline-friendly PWA behavior
 
 ## Run locally
+
 Use any static server (do not open with `file://`).
 
 Examples:
@@ -15,13 +17,26 @@ Examples:
 Then open:
 - `http://localhost:8080/index.html`
 
+## Architecture
+
+See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for module boundaries, runtime flow, and maintainability conventions.
+
 ## Checks before deploy
+
 ```bash
 npm run check
+npm test
 ```
 
-Individual commands:
+Useful maintenance commands:
+- `npm run head:sync` to sync shared `<head>` security/favicon block across pages
+- `npm run sw:assets:sync` to regenerate the service worker app shell asset list
+
+Individual checks:
 - `npm run check:js`
+- `npm run check:imports`
 - `npm run check:books`
 - `npm run check:shell`
-- `npm test`
+- `npm run check:head`
+- `npm run check:swassets`
+- `npm run check:policy`

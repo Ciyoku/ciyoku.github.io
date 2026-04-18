@@ -7,12 +7,15 @@ import {
     getBookPartCount,
     parsePartParam
 } from '../js/core/books-meta.js';
+import { parseBookContentAsync } from '../js/core/reader-parser.js';
+import { groupBooksByAuthor, filterBooksByAuthor } from '../js/features/authors/authors-data.js';
+import { groupBooksByCategory, filterBooksByCategoryName } from '../js/features/categories/categories-data.js';
+import { buildPartNavigationModel } from '../js/features/reader/pagination.js';
 import { createSearchEngine, searchInBookIndex } from '../js/features/reader/search.js';
 import {
     buildReaderUrlForState,
     parseReaderStateFromSearchParams
 } from '../js/features/reader/url-state.js';
-import { buildPartNavigationModel } from '../js/features/reader/pagination.js';
 import { normalizeArabicForSearch } from '../js/shared/arabic-search.js';
 
 const testCases = [];
@@ -169,6 +172,68 @@ test('reader-search: token indexing narrows candidates', () => {
     const result = searchInBookIndex(engine, 'حديث التوحيد');
     assert.equal(result.matches.length, 1);
     assert.equal(result.matches[0].line, 'الكافي حديث التوحيد');
+});
+
+test('authors-data: groups and filters books by normalized author name', () => {
+    const books = [
+        { id: 'a', title: 'Book A', author: 'Author One' },
+        { id: 'b', title: 'Book B', author: 'Author Two' },
+        { id: 'c', title: 'Book C', author: ['Author One', 'Author Three'] }
+    ];
+
+    const grouped = groupBooksByAuthor(books);
+    const authorOne = grouped.find((row) => row.name === 'Author One');
+    const authorTwo = grouped.find((row) => row.name === 'Author Two');
+
+    assert.ok(authorOne);
+    assert.ok(authorTwo);
+    assert.equal(authorOne.count, 2);
+    assert.equal(authorTwo.count, 1);
+
+    const filtered = filterBooksByAuthor(books, 'author one');
+    assert.equal(filtered.length, 2);
+    assert.deepEqual(filtered.map((book) => book.id).sort(), ['a', 'c']);
+});
+
+test('categories-data: groups and filters books by normalized category name', () => {
+    const books = [
+        { id: 'a', title: 'Book A', categories: ['Hadith', 'Fiqh'] },
+        { id: 'b', title: 'Book B', category: 'Fiqh' },
+        { id: 'c', title: 'Book C', التصنيف: 'Aqidah' }
+    ];
+
+    const grouped = groupBooksByCategory(books);
+    const fiqh = grouped.find((row) => row.name === 'Fiqh');
+    const hadith = grouped.find((row) => row.name === 'Hadith');
+
+    assert.ok(fiqh);
+    assert.ok(hadith);
+    assert.equal(fiqh.count, 2);
+    assert.equal(hadith.count, 1);
+
+    const filtered = filterBooksByCategoryName(books, 'fiqh');
+    assert.equal(filtered.length, 2);
+    assert.deepEqual(filtered.map((book) => book.id).sort(), ['a', 'b']);
+});
+
+test('reader-parser: extracts chapters, pages, and search index', async () => {
+    const text = [
+        '# الكتاب الأول',
+        'سطر تمهيدي',
+        '## الفصل الأول',
+        'سطر داخل الفصل الأول',
+        'PAGE_SEPARATOR',
+        '## الفصل الثاني',
+        'سطر داخل الفصل الثاني'
+    ].join('\n');
+
+    const parsed = await parseBookContentAsync(text, { chunkSize: 2 });
+    assert.equal(parsed.pages.length, 2);
+    assert.equal(parsed.chapters.length, 3);
+    assert.equal(parsed.searchIndex.length, 3);
+    assert.equal(parsed.chapters[0].kind, 'book');
+    assert.equal(parsed.chapters[1].kind, 'section');
+    assert.equal(parsed.chapters[2].pageIndex, 1);
 });
 
 let passed = 0;

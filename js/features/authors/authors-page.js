@@ -1,8 +1,11 @@
 import { fetchBooksList } from '../../core/books-repo.js';
-import { buildAuthorPageUrl, groupBooksByAuthor } from './authors-data.js';
-import { toArabicIndicNumber } from '../../shared/number-format.js';
 import { onDomReady } from '../../shared/bootstrap.js';
-import { createIosLoader } from '../../shared/loading-indicator.js';
+import { toArabicIndicNumber } from '../../shared/number-format.js';
+import { renderEntityListPage } from '../entities/entity-list-page.js';
+import { buildAuthorPageUrl, groupBooksByAuthor } from './authors-data.js';
+
+const EMPTY_AUTHORS_MESSAGE = 'لا توجد أسماء مؤلفين متاحة في books/list.json.';
+const LOAD_AUTHORS_ERROR_PREFIX = 'تعذر تحميل المؤلفين';
 
 onDomReady(initAuthorsPage);
 
@@ -27,10 +30,14 @@ function createAuthorListItem(index, authorRow) {
     return item;
 }
 
-function renderLoadingSummary(summary) {
-    summary.hidden = false;
-    summary.className = 'status-ok status-loading';
-    summary.replaceChildren(createIosLoader({ size: 'sm' }));
+async function loadAuthors() {
+    const books = await fetchBooksList();
+    return groupBooksByAuthor(books);
+}
+
+function formatAuthorsSummary(count) {
+    const authorCountLabel = toArabicIndicNumber(count);
+    return `عدد المؤلفين: ${authorCountLabel}`;
 }
 
 async function initAuthorsPage() {
@@ -38,31 +45,13 @@ async function initAuthorsPage() {
     const list = document.getElementById('authorsList');
     if (!summary || !list) return;
 
-    try {
-        renderLoadingSummary(summary);
-
-        const books = await fetchBooksList();
-        const authors = groupBooksByAuthor(books);
-
-        if (!authors.length) {
-            list.replaceChildren();
-            summary.className = 'status-error';
-            summary.textContent = 'لا توجد أسماء مؤلفين متاحة في books/list.json.';
-            return;
-        }
-
-        const fragment = document.createDocumentFragment();
-        authors.forEach((authorRow, index) => {
-            fragment.appendChild(createAuthorListItem(index + 1, authorRow));
-        });
-        list.replaceChildren(fragment);
-
-        const authorCountLabel = toArabicIndicNumber(authors.length);
-        summary.className = 'status-ok';
-        summary.textContent = `عدد المؤلفين: ${authorCountLabel}`;
-    } catch (error) {
-        list.replaceChildren();
-        summary.className = 'status-error';
-        summary.textContent = `تعذر تحميل المؤلفين: ${error.message}`;
-    }
+    await renderEntityListPage({
+        rootElement: list,
+        summaryElement: summary,
+        loadEntities: loadAuthors,
+        createEntityNode: (authorRow, index) => createAuthorListItem(index, authorRow),
+        formatCountSummary: formatAuthorsSummary,
+        emptySummaryMessage: EMPTY_AUTHORS_MESSAGE,
+        loadErrorPrefix: LOAD_AUTHORS_ERROR_PREFIX
+    });
 }
