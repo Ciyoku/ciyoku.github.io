@@ -1,6 +1,6 @@
 # Architecture Overview
 
-This repository is a static Arabic digital library delivered as plain HTML/CSS/ES modules and optimized for GitHub Pages.
+This repository is a Static Islamic Shia digital library delivered as plain HTML/CSS/ES modules and optimized for GitHub Pages.
 
 ## High-Level Layout
 
