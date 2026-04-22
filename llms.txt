@@ -2,7 +2,7 @@
 site: https://ciyoku.github.io
 language: ar
 direction: rtl
-content_type: Arabic religious library (static catalog + dynamic reader)
+content_type: Shia Islamic library (static catalog + dynamic reader)
 
 ## Canonical URL Rules
 - Home catalog: /
